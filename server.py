@@ -928,6 +928,17 @@ def get_question():
           'question': current_question['question']
       })
 
+def end_checkin(careteam_id):
+    # Logic to handle the end of check-in for the given careteam_id
+    current_week = len(data['check_ins'])
+    week = f"Week {current_week}"
+    data['check_ins'][careteam_id][week] = {'current_question_index': 0}
+    
+    # Save the data in the JSON file
+    with open(json_file_path, 'w') as json_file:
+        json.dump(data, json_file, indent=4)
+
+
 
 @app.route('/submit_answer', methods=['POST'])
 def submit_answer():
@@ -960,6 +971,12 @@ def submit_answer():
     question_keys = list(questions.keys())
     question_count = len(question_keys)
 
+    
+
+
+
+
+
     # Check if all questions have been answered for this week
     if current_question_index >= question_count:
       return jsonify(
@@ -968,6 +985,11 @@ def submit_answer():
     # Get the current question and options (if applicable)
     current_question_key = question_keys[current_question_index]
     current_question = questions[current_question_key]
+
+    # Check if the user responded "no" to question 4
+    if current_question_key == 'Q4' and user_response.lower() == 'no':
+        end_checkin(careteam_id)
+        return jsonify({'message': 'All questions for this week have been answered!'})
 
     # Insert into the database (if needed)
     insert_checkin(str(current_question), user_response, caregiver_id,
@@ -1016,6 +1038,8 @@ def submit_answer():
     traceback.print_exc()
 
     return jsonify({'error': 'Internal Server Error'}), 500
+
+
 
 
 # ... (previously defined code)
