@@ -1,0 +1,63 @@
+{
+    "check_ins": {
+        "careteam_id1": {
+            "Week 1": {
+                "current_question_index": 0
+            }
+        },
+        "careteam_id2": {
+            "Week 1": {
+                "current_question_index": 0
+            }
+        },
+        "trial4": {
+            "Week 2": {
+                "current_question_index": 0
+            },
+            "Week 3": {
+                "Q1": {
+                    "question": {
+                        "question": "How is the patient's mood today?",
+                        "options": [
+                            "Agitated",
+                            "Angry",
+                            "Frustrated",
+                            "Lost",
+                            "Neutral",
+                            "Happy"
+                        ]
+                    },
+                    "response": "Lost"
+                },
+                "current_question_index": 1
+            }
+        },
+        "null": {
+            "Week 3": {
+                "current_question_index": 0
+            }
+        },
+        "null": {
+            "Week 4": {
+                "current_question_index": 0
+            },
+            "Week 5": {
+                "Q1": {
+                    "question": {
+                        "question": "How is the patient's mood today?",
+                        "options": [
+                            "Agitated",
+                            "Angry",
+                            "Frustrated",
+                            "Lost",
+                            "Neutral",
+                            "Happy"
+                        ]
+                    },
+                    "response": "Lost"
+                },
+                "current_question_index": 1
+            }
+        }
+    }
+}

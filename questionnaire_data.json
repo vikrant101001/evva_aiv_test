@@ -1,0 +1,14 @@
+{
+    "assessments": {
+        "careteam_id1": {
+            "Week 1": {
+                "current_question_index": 0
+            }
+        },
+        "careteam_id2": {
+            "Week 1": {
+                "current_question_index": 0
+            }
+        }
+    }
+}

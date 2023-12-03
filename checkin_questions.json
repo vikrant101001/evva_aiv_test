@@ -1,0 +1,49 @@
+# Define the questions and gather user information
+questions = {
+    'Q1': {
+        'question': "How is Martha's mood today?",
+        'options':
+        ["Agitated", "Angry", "Frustrated", "Lost", "Neutral", "Happy"]
+    },
+    'Q2': {
+        'question':
+        "Has Martha experienced any of the following in the past week?",
+        'options': ["Increasing irritability", "Wandering", "Delusions"]
+    },
+    'Q3': "How long did Martha sleep yesterday?",
+    'Q4': {
+        'question':
+        "How was Martha's sleep yesterday?",
+        'options': [
+            "Well rested", "Woke up once", "Woke up 2 or 3 times",
+            "Woke up 4 or more times", "Disrupted"
+        ]
+    },
+    'Q5': {
+        'question':
+        "Has Martha experienced any vomiting in the past week? (yes/no)",
+        'options': ["yes", "no"]
+    },
+    'Q5.1': {
+        'question':
+        "How many times in the past week?",
+        'options':
+        ["Once only", "2 to 3 times", "4 to 5 times", "More than 5 times"]
+    },
+    'Q5.2': {
+        'question':
+        "For how long did the episode last?",
+        'options': [
+            "Less than 30 minutes", "30 mins to an hour", "1 to 4 hours",
+            "Full day"
+        ]
+    },
+    'Q5.3': {
+        'question':
+        "How did it impact Martha's daily activities?",
+        'options': [
+            "Difficulty eating and drinking", "Difficulty walking", "Fatigue",
+            "Severe dehydration"
+        ]
+    }
+}

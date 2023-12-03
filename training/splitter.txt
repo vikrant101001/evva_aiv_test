@@ -1,0 +1,3 @@
+Split the entire thing into chunks meaningfully.
+A chunk may consist of single or multiple lines.
+Seperate each chunk by a "*" symbol

@@ -1,0 +1,379 @@
+[{
+    "title":
+    "Daily Activities",
+    "question":
+    "Can Martha feed herself without assistance or does she need help during meal times?",
+    "options": [{
+        "option": "Manages independently",
+        "score": 3
+    }, {
+        "option": "Requires occasional assistance",
+        "score": 2
+    }, {
+        "option": "Needs frequent assistance",
+        "score": 1
+    }, {
+        "option": "Requires full assistance",
+        "score": 0
+    }]
+}, {
+    "title":
+    "Daily Activities",
+    "question":
+    "I see. Moving on, when it comes to dressing, can Martha put on her clothes without any assistance? Or does she struggle with certain aspects like buttons, zippers, or shoe laces?",
+    "options": [{
+        "option": "Manages independently",
+        "score": 3
+    }, {
+        "option": "Requires occasional assistance",
+        "score": 2
+    }, {
+        "option": "Needs frequent assistance",
+        "score": 1
+    }, {
+        "option": "Requires full assistance",
+        "score": 0
+    }]
+}, {
+    "title":
+    "Daily Activities",
+    "question":
+    "Thank you for sharing. Now, regarding toileting, can Martha use the toilet independently, or does she require some assistance for certain parts, like cleaning or flushing?",
+    "options": [{
+        "option": "Manages independently",
+        "score": 3
+    }, {
+        "option": "Requires occasional assistance",
+        "score": 2
+    }, {
+        "option": "Needs frequent assistance",
+        "score": 1
+    }, {
+        "option": "Requires full assistance",
+        "score": 0
+    }]
+}, {
+    "title":
+    "Daily Activities",
+    "question":
+    "Thank you for being patient with these questions. When it comes to personal hygiene, can Martha brush her teeth, comb her hair, and wash her face and hands without assistance?",
+    "options": [{
+        "option": "Manages independently",
+        "score": 3
+    }, {
+        "option": "Requires occasional assistance",
+        "score": 2
+    }, {
+        "option": "Needs frequent assistance",
+        "score": 1
+    }, {
+        "option": "Requires full assistance",
+        "score": 0
+    }]
+}, {
+    "title":
+    "Daily Activities",
+    "question":
+    "Okay, and for bathing, is Martha able to bathe herself without any help? Or does she need assistance with some parts, like washing her back or feet?",
+    "options": [{
+        "option": "Manages independently",
+        "score": 3
+    }, {
+        "option": "Requires occasional assistance",
+        "score": 2
+    }, {
+        "option": "Needs frequent assistance",
+        "score": 1
+    }, {
+        "option": "Requires full assistance",
+        "score": 0
+    }]
+}, {
+    "title":
+    "Mobility",
+    "question":
+    "Got it. How about transferring? Is Martha able to move in and out of her bed or chair on her own? Or does she need some help or an assistive device for that?",
+    "options": [{
+        "option": "Manages independently",
+        "score": 3
+    }, {
+        "option": "Requires occasional assistance",
+        "score": 2
+    }, {
+        "option": "Needs frequent assistance",
+        "score": 1
+    }, {
+        "option": "Requires full assistance",
+        "score": 0
+    }]
+}, {
+    "title":
+    "Mobility",
+    "question":
+    "How would you rate Martha’s ability to walk a block or climb a flight of stairs or more?",
+    "options": [{
+        "option": "Manages independently",
+        "score": 3
+    }, {
+        "option": "Requires occasional assistance",
+        "score": 2
+    }, {
+        "option": "Needs frequent assistance",
+        "score": 1
+    }, {
+        "option": "Requires full assistance",
+        "score": 0
+    }]
+}, {
+    "title":
+    "Cognition",
+    "question":
+    "Has Martha experienced any difficulties with memory, attention, or problem-solving that affected daily life?",
+    "options": [{
+        "option": "Rarely or never",
+        "score": 3
+    }, {
+        "option": "Occasionally",
+        "score": 2
+    }, {
+        "option": "Frequently",
+        "score": 1
+    }, {
+        "option": "Constantly",
+        "score": 0
+    }]
+}, {
+    "title":
+    "Cognition",
+    "question":
+    "Thank you. Has Martha exhibited difficulties in recognizing their environment or wandered away from home lately?",
+    "options": [{
+        "option": "Rarely or never",
+        "score": 3
+    }, {
+        "option": "Occasionally",
+        "score": 2
+    }, {
+        "option": "Frequently",
+        "score": 1
+    }, {
+        "option": "Constantly",
+        "score": 0
+    }]
+}, {
+    "title":
+    "Cognition",
+    "question":
+    "And has Martha faced difficulties remembering date and month or familiar faces?",
+    "options": [{
+        "option": "Rarely or never",
+        "score": 3
+    }, {
+        "option": "Occasionally",
+        "score": 2
+    }, {
+        "option": "Frequently",
+        "score": 1
+    }, {
+        "option": "Constantly",
+        "score": 0
+    }]
+}, {
+    "title":
+    "Mind",
+    "question":
+    "Has Martha felt agitated, anxious, irritable, or depressed?",
+    "options": [{
+        "option": "Rarely or never",
+        "score": 3
+    }, {
+        "option": "Occasionally",
+        "score": 2
+    }, {
+        "option": "Frequently",
+        "score": 1
+    }, {
+        "option": "Constantly",
+        "score": 0
+    }]
+}, {
+    "title":
+    "Mind",
+    "question":
+    "Thank you for answering. From late afternoon till night, has Martha shown increased confusion, disorientation, restlessness, or difficulty sleeping?",
+    "options": [{
+        "option": "Rarely or never",
+        "score": 3
+    }, {
+        "option": "Occasionally",
+        "score": 2
+    }, {
+        "option": "Frequently",
+        "score": 1
+    }, {
+        "option": "Constantly",
+        "score": 0
+    }]
+}, {
+    "title":
+    "Independence (IADL)",
+    "question":
+    "Thanks for that. Now, let's move on to some instrumental activities. Can Martha prepare and cook meals by herself? Or does she require help with certain dishes or prefer pre-prepared meals?",
+    "options": [{
+        "option": "Manages independently",
+        "score": 3
+    }, {
+        "option": "Requires occasional assistance",
+        "score": 2
+    }, {
+        "option": "Needs frequent assistance",
+        "score": 1
+    }, {
+        "option": "Requires full assistance",
+        "score": 0
+    }]
+}, {
+    "title":
+    "Independence (IADL)",
+    "question":
+    "Understood. When it comes to her medications, can Martha manage and take them correctly without supervision? Or does she sometimes forget and need reminders?",
+    "options": [{
+        "option": "Manages independently",
+        "score": 3
+    }, {
+        "option": "Requires occasional assistance",
+        "score": 2
+    }, {
+        "option": "Needs frequent assistance",
+        "score": 1
+    }, {
+        "option": "Requires full assistance",
+        "score": 0
+    }]
+}, {
+    "title":
+    "Independence (IADL)",
+    "question":
+    "Alright. How about money management? Can she handle her finances, pay bills, and manage money without assistance?",
+    "options": [{
+        "option": "Manages independently",
+        "score": 3
+    }, {
+        "option": "Requires occasional assistance",
+        "score": 2
+    }, {
+        "option": "Needs frequent assistance",
+        "score": 1
+    }, {
+        "option": "Requires full assistance",
+        "score": 0
+    }]
+}, {
+    "title":
+    "Independence (IADL)",
+    "question":
+    "Thanks for sharing. Does Martha still use the phone? Is she able to make and answer calls independently?",
+    "options": [{
+        "option": "Manages independently",
+        "score": 3
+    }, {
+        "option": "Requires occasional assistance",
+        "score": 2
+    }, {
+        "option": "Needs frequent assistance",
+        "score": 1
+    }, {
+        "option": "Requires full assistance",
+        "score": 0
+    }]
+}, {
+    "title":
+    "Independence (IADL)",
+    "question":
+    "Got it. Regarding housekeeping, can Martha manage household chores on her own, or does she require some assistance?",
+    "options": [{
+        "option": "Manages independently",
+        "score": 3
+    }, {
+        "option": "Requires occasional assistance",
+        "score": 2
+    }, {
+        "option": "Needs frequent assistance",
+        "score": 1
+    }, {
+        "option": "Requires full assistance",
+        "score": 0
+    }]
+}, {
+    "title":
+    "Independence (IADL)",
+    "question":
+    "Thank you. When it comes to shopping, can Martha shop for groceries and necessities independently? Or does she need some help or prefer to make only small purchases?",
+    "options": [{
+        "option": "Manages independently",
+        "score": 3
+    }, {
+        "option": "Requires occasional assistance",
+        "score": 2
+    }, {
+        "option": "Needs frequent assistance",
+        "score": 1
+    }, {
+        "option": "Requires full assistance",
+        "score": 0
+    }]
+}, {
+    "title":
+    "Independence (IADL)",
+    "question":
+    "And concerning transportation, is Martha still driving or using public transport by herself? Or does she require assistance or uses pre-arranged transportation?",
+    "options": [{
+        "option": "Manages independently",
+        "score": 3
+    }, {
+        "option": "Requires occasional assistance",
+        "score": 2
+    }, {
+        "option": "Needs frequent assistance",
+        "score": 1
+    }, {
+        "option": "Requires full assistance",
+        "score": 0
+    }]
+}, {
+    "title":
+    "Social",
+    "question":
+    "Now, thinking about Martha’s social activity. Has Martha had any difficulty interacting with relatives or friends or participating in community or social activities?",
+    "options": [{
+        "option": "No difficulty, socializes independently",
+        "score": 3
+    }, {
+        "option": "Some difficulty",
+        "score": 2
+    }, {
+        "option": "Much difficulty",
+        "score": 1
+    }, {
+        "option": "Cannot socialize without assistance",
+        "score": 0
+    }]
+}, {
+    "title":
+    "Social",
+    "question":
+    "How frequently does Martha engage in social activities or maintain relationships?",
+    "options": [{
+        "option": "Regularly",
+        "score": 3
+    }, {
+        "option": "Occasionally",
+        "score": 2
+    }, {
+        "option": "Rarely",
+        "score": 1
+    }, {
+        "option": "Almost never or never",
+        "score": 0
+    }]
+}]
