@@ -849,7 +849,6 @@ def ask():
         ]
         answer = llmChain.predict(question=user_question,context="\n\n".join(contexts),history=history)
 
-        bot_answer = splitter(answer)
 
       history.append(f"Human: {user_question}")
       history.append(f"Bot: {answer}")
