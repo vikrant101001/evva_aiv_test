@@ -852,11 +852,11 @@ def ask():
         bot_answer = splitter(answer)
 
       history.append(f"Human: {user_question}")
-      history.append(f"Bot: {bot_answer}")
+      history.append(f"Bot: {answer}")
 
       insert_conversation(user_question, answer, careteam_id, caregiver_id)
 
-      return jsonify({"answer": bot_answer, "success": True})
+      return jsonify({"answer": answer, "success": True})
     else:
       return jsonify({
           "answer": None,
