@@ -681,10 +681,10 @@ def ask():
         print(f"All Headers: {request.headers}")
 
         current_time = time.time()
-        if current_time - last_api_call_time > 600:
+        if current_time - last_api_call_time > 300:
             
             reset_history()
-
+            searched = 0
             # Only confirm address if the question is related to a search
             user_location = get_coordinates(user_address)
             count1 = train(user_location)  # Train based on user location for the first call of a session
