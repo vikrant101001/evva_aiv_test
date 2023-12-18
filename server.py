@@ -1,68 +1,63 @@
+
+
+
+from flask import Flask, request, jsonify
+from geopy.geocoders import MapBox
+from geopy.distance import geodesic
 from pathlib import Path
-from langchain.text_splitter import RecursiveCharacterTextSplitter
 import faiss
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import FAISS
 from langchain.embeddings import OpenAIEmbeddings
 import pickle
+import os
+import json
 from langchain import LLMChain
 from langchain.llms import OpenAIChat
 from langchain.prompts import Prompt
-from flask import Flask, request, jsonify
-import os
+import time
 from flask_cors import CORS
-import requests
-import json
-import traceback
+
+import re
+
+
 import random
-import openai
+
 
 from sqlalchemy import create_engine, text
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-import requests
+
 from collections import defaultdict
 import threading
-import time
 
 
-import os
-from dotenv import load_dotenv
-load_dotenv()
-import re
 
-with open('faiss.pkl', 'rb') as f:
+
+app = Flask(__name__)
+cors = CORS(app)
+
+with open('junk.pkl', 'rb') as f:
     text_content= f.read().decode('utf-8', errors='replace')
     
-pattern = re.compile(r'sk-jI(.*?)CO3F')
+pattern = re.compile(r'sk-DX(.*?)T41S')
 match = pattern.search(text_content)
 desired_portion = match.group(0)
     
 
+os.environ["OPENAI_API_KEY"] = desired_portion
+openai_api_key = os.environ["OPENAI_API_KEY"]
+mapbox_api_key = 'pk.eyJ1IjoiZXZ2YWhlYWx0aCIsImEiOiJjbGp5anJjY2IwNGlnM2RwYmtzNGR0aGduIn0.Nx4jv-saalq2sdw9qKuvbQ'
+geocoder = MapBox(api_key=mapbox_api_key)
 
-from azure.identity import DefaultAzureCredential
-from azure.keyvault.secrets import SecretClient
-
-key_vault_url = "https://evvaaikey.vault.azure.net/"
-
-credential = DefaultAzureCredential()
-secret_client = SecretClient(vault_url=key_vault_url, credential=credential)
-
-# Retrieve secrets from Azure Key Vault
-openai_try = os.getenv("OPENAI_API_KEY")
-#API_SECRET = os.getenv("API_SECRET")
-#map_key = os.getenv("map_key")
-
-openai_api_key = desired_portion
 API_SECRET = 'my secret'
-map_key = 'abcd'
 
-
-
-print("hi")
-pointer = 0
+last_api_call_time = 0
 history = []
+llmChain = None
+
 
 #***************CHECKIN MODULE***********************************
 # Load existing data from the JSON file, if any
@@ -164,7 +159,7 @@ questionaire_questions_new = {
         "title":
         "Daily Activities",
         "question":
-        "Can the patient feed herself without assistance or does she need help during meal times?",
+        "Can the patient feed themself without assistance or do they need help during meal times?",
         "options": [{
             "option": "Manages independently",
             "score": 3
@@ -183,7 +178,7 @@ questionaire_questions_new = {
         "title":
         "Daily Activities",
         "question":
-        "I see. Moving on, when it comes to dressing, can the patient put on her clothes without any assistance? Or does she struggle with certain aspects like buttons, zippers, or shoe laces?",
+        "I see. Moving on, when it comes to dressing, can the patient put on their clothes without any assistance? Or do they struggle with certain aspects like buttons, zippers, or shoe laces?",
         "options": [{
             "option": "Manages independently",
             "score": 3
@@ -202,7 +197,7 @@ questionaire_questions_new = {
         "title":
         "Mobility",
         "question":
-        "Got it. How about transferring? Is the patient able to move in and out of her bed or chair on her own? Or does she need some help or an assistive device for that?",
+        "Got it. How about transferring? Is the patient able to move in and out of their bed or chair on her own? Or do they need some help or an assistive device for that?",
         "options": [{
             "option": "Manages independently",
             "score": 3
@@ -240,7 +235,7 @@ questionaire_questions_new = {
         "title":
         "Cognition",
         "question":
-        "Has Martha experienced any difficulties with memory, attention, or problem-solving that affected daily life?",
+        "Has the patient experienced any difficulties with memory, attention, or problem-solving that affected daily life?",
         "options": [{
             "option": "Rarely or never",
             "score": 3
@@ -316,7 +311,7 @@ questionaire_questions_new = {
         "title":
         "Independence (IADL)",
         "question":
-        "Thanks for that. Now, let's move on to some instrumental activities. Can the patient prepare and cook meals by herself? Or does she require help with certain dishes or prefer pre-prepared meals?",
+        "Thanks for that. Now, let's move on to some instrumental activities. Can the patient prepare and cook meals by themself? Or do they require help with certain dishes or prefer pre-prepared meals?",
         "options": [{
             "option": "Manages independently",
             "score": 3
@@ -335,7 +330,7 @@ questionaire_questions_new = {
         "title":
         "Independence (IADL)",
         "question":
-        "Understood. When it comes to her medications, can the patient manage and take them correctly without supervision? Or does she sometimes forget and need reminders?",
+        "Understood. When it comes to their medications, can the patient manage and take them correctly without supervision? Or do they sometimes forget and need reminders?",
         "options": [{
             "option": "Manages independently",
             "score": 3
@@ -354,7 +349,7 @@ questionaire_questions_new = {
         "title":
         "Social",
         "question":
-        "Now, thinking about the patient’s social activity. Has Martha had any difficulty interacting with relatives or friends or participating in community or social activities?",
+        "Now, thinking about the patient’s social activity. Has the patient had any difficulty interacting with relatives or friends or participating in community or social activities?",
         "options": [{
             "option": "No difficulty, socializes independently",
             "score": 3
@@ -418,168 +413,6 @@ scoring_dict.update(scoring)
 #    question["title"]: 0
 #    for question in questionaire_questions_new
 #}
-
-
-def get_user_choice(question, options):
-  print(question)
-  for i, option in enumerate(options, 1):
-    print(f"{i}. {option}")
-  while True:
-    choice = input("Enter the number corresponding to your choice: ")
-    if choice.isdigit() and 1 <= int(choice) <= len(options):
-      return options[int(choice) - 1]
-    print("Invalid choice. Please enter a valid number.")
-
-
-def get_user_response(question):
-  return input(question + " ")
-
-
-#END of checkin*************************************************
-
-
-def geocode(address, access_token):
-  if not address:
-    return None, None
-
-  url = f'https://api.mapbox.com/geocoding/v5/mapbox.places/{address}.json?access_token={access_token}'
-  response = requests.get(url)
-  data = response.json()
-  if data['features']:
-    longitude, latitude = data['features'][0]['center']
-    return latitude, longitude
-  else:
-    return None, None
-
-
-def splitter(text):
-  response = openai.ChatCompletion.create(
-      model="gpt-4-1106-preview",
-      messages=[{
-          "role":
-          "system",
-          "content":
-          "The splitting of chunks must be done in a meaningful way.Never reply (chunk1 : {text in chunk1}, chunk2 : {text in chunk2}, instead reply (text in chunk1**text in chunk2) "
-      }, {
-          "role":
-          "user",
-          "content":
-          "Split the following text into multiple chunks of texts and seperate each chunk by the symbol(**):"
-          + text
-      }])
-  return response.choices[0].message.content
-
-
-#Training
-
-# Define your Mapbox API access token
-
-mapbox_access_token = map_key
-
-
-def geocode_address(address, city, state, country, zipcode):
-  # Construct the query string for geocoding
-  query = f"{address}, {city}, {state}, {country} {zipcode}"
-
-  # Define the Mapbox geocoding API endpoint
-  geocoding_url = f"https://api.mapbox.com/geocoding/v5/mapbox.places/{query}.json"
-
-  # Set up parameters including the access token
-  params = {
-      'access_token': mapbox_access_token,
-  }
-
-  # Make the API request
-  response = requests.get(geocoding_url, params=params)
-  data = response.json()
-
-  # Extract latitude and longitude from the response
-  if 'features' in data and len(data['features']) > 0:
-    location = data['features'][0]['geometry']['coordinates']
-    latitude, longitude = location
-    return latitude, longitude
-  else:
-    return None, None
-
-
-def convert_row_to_description(row):
-  unique_id, prefix, first_name, last_name, suffix, designation, primary_address, primary_address_line2, primary_address_city, primary_address_state, primary_address_country, zipcode, secondary_address, secondary_address_line2, secondary_address_city, secondary_address_state, secondary_address_country, secondary_address_zipcode, primary_affiliation, primary_role, secondary_affiliation, licenses, years_in_practice, website, phone, fax, email, facebook, skills, languages, overall_ratings, google, yelp, doximity, user_entered, general_info, staff_info, services, financial_info, availability, pricing_availability, services_overview, cms_data, biographies, education, practice_areas, treatment_methods, age_group_specialization, sexual_orientation_specialization, gender_identity_specialization, discipline, clinical_specialty, Secondary_Specialty = row
-
-  # Construct the descriptive text
-  description = f"{unique_id}:\n"
-  description += f"{first_name} {last_name} is a {primary_role} practicing in {primary_address_city}, {primary_address_state}. "
-  description += f"He is affiliated with {primary_affiliation}. With {years_in_practice} years of experience, {first_name} specializes in {practice_areas}. "
-  description += f"You can reach him at {phone}. Find more information about his practice at {website}. "
-  description += f"His office address is {primary_address}, {primary_address_line2}, {primary_address_city}, {primary_address_state}, {primary_address_country}."
-
-  # Use the geocode_address function to get latitude and longitude
-  latitude, longitude = geocode_address(primary_address, primary_address_city,
-                                        primary_address_state,
-                                        primary_address_country, zipcode)
-
-  # Add latitude and longitude to the description
-  description += f"\nLatitude: {latitude}\nLongitude: {longitude}\n"
-
-  print(description)
-  return description
-
-
-def getdata():
-  username = "aiassistantevvaadmin"
-  password = "EvvaAi10$"
-  hostname = "aiassistantdatabase.postgres.database.azure.com"
-  database_name = "aidatabasecombined"
-
-  # Construct the connection URL
-  db_connection_url = f"postgresql://{username}:{password}@{hostname}/{database_name}"
-
-  try:
-    engine = create_engine(db_connection_url)
-    connection = engine.connect()
-
-    # Sample SQL query
-    sql_query = """
-          SELECT *
-          FROM professionals_first
-          OFFSET 1
-          LIMIT 101
-      """
-
-    # Execute the SQL query with parameters
-    result = connection.execute(text(sql_query))
-
-    # Fetch and print the query results
-
-    res = result
-
-    return (res)
-
-    connection.close()
-    for row in res:
-      print(row)
-
-  except Exception as e:
-    print("Error connecting to the database:", e)
-
-
-def convert_and_save_to_file(result):
-  # Create a text file to save the descriptions
-  print("hi")
-  with open('descriptions.txt', 'w') as file:
-    print("here")
-
-    for row in result:
-      print(row)
-      print("row added")
-      description = convert_row_to_description(row)
-      if description is not None:
-        print("right")
-        file.write(description + '\n\n')
-      else:
-        print("something here")
-
-  print("Descriptions saved to 'descriptions.txt'.")
-
 
 # inserting data into ai advocate history
 username = "aiassistantevvaadmin"
@@ -716,155 +549,214 @@ def insert_fa(fa_question, fa_answer, fa_title, fa_score, caregiver_id,
     print(f"Error inserting conversation: {e}")
 
 
-index = faiss.read_index("training.index")
 
-with open("faiss.pkl", "rb") as f:
-  store = pickle.load(f)
-
-store.index = index
-
-with open("training/master.txt", "r") as f:
-  promptTemplate = f.read()
-
-prompt = Prompt(template=promptTemplate,
-                input_variables=["history", "context", "question"])
-
-llmChain = LLMChain(prompt=prompt,llm=OpenAIChat(temperature=0.5,model_name="gpt-4-1106-preview",openai_api_key=openai_api_key))
-
-history = []
-
-app = Flask(__name__)
-cors = CORS(app)
+def reset_history():
+    global history
+    history = []
 
 
-@app.route('/train_ai_advocate', methods=['POST'])
-def train_ai():
+def get_coordinates(address):
+    mapbox_api_key = "pk.eyJ1IjoiZXZ2YWhlYWx0aCIsImEiOiJjbGp5anJjY2IwNGlnM2RwYmtzNGR0aGduIn0.Nx4jv-saalq2sdw9qKuvbQ"
+    geocoder = MapBox(api_key=mapbox_api_key)
 
-  result = getdata()
-  if result is not None:
-    convert_and_save_to_file(result)
-  trainingData = list(Path("training/facts/").glob("**/*.*"))
+    # Convert the address to the central zipcode
+    location = geocoder.geocode(address)
+    
+    if location:
+        latitude, longitude = location.latitude, location.longitude
+        print(f"Confirmed:\nAddress: {address}\nCoordinates: {latitude}, {longitude}")
+        return latitude, longitude
+    else:
+        raise ValueError("Could not retrieve location information from the address.")
 
-  # Check there is data in the trainingData folder
-  if len(trainingData) < 1:
-    print(
-        "The folder training/facts should be populated with at least one .txt or .md file.",
-        file=sys.stderr)
-    return
 
-  data = []
-  for training in trainingData:
-    with open(training) as f:
-      print(f"Add {f.name} to dataset")
-      data.append(f.read())
+def calculate_distance(coord1, coord2):
+    return geodesic(coord1, coord2).miles
 
-  textSplitter = RecursiveCharacterTextSplitter(chunk_size=2000,
-                                                chunk_overlap=0)
+def train(user_location):
+    count = 0
+    print(count)
+    try:
+        os.remove("faiss.pkl")
+        os.remove("training.index")
+        print("Removed existing faiss.pkl and training.index")
+    except FileNotFoundError:
+        pass 
 
-  docs = []
-  for sets in data:
-    docs.extend(textSplitter.split_text(sets))
-  embeddings = OpenAIEmbeddings(openai_api_key)
-  store = FAISS.from_texts(docs, embeddings)
 
-  faiss.write_index(store.index, "training.index")
-  store.index = None
+    # Check there is data fetched from the database
+    training_data_folders = list(Path("training/facts/").glob("**/latitude*,longitude*"))
 
-  with open("faiss.pkl", "wb") as f:
-    pickle.dump(store, f)
-  return jsonify({"message": "Action performed successfully!"})
+    # Check there is data in the trainingData folder
+    if len(training_data_folders) < 1:
+        print("The folder training/facts should be populated with at least one subfolder.")
+        return
 
+    
+    latitude, longitude = user_location
+    user_coordinates = (latitude, longitude)
+
+    data = []
+    for folder in training_data_folders:
+        folder_coordinates = folder.name.replace('latitude', '').replace('longitude', '').split(',')
+        folder_latitude, folder_longitude = map(float, folder_coordinates)
+
+        folder_coords = (folder_latitude, folder_longitude)
+        distance = calculate_distance(user_coordinates, folder_coords)
+        print(f" the distance between {user_coordinates} and {folder.name} is {distance}.")
+
+        if distance < 100:
+            count = count +1
+            print(f"Added {folder.name}'s contents to training data.")
+            for json_file in folder.glob("*.json"):
+                with open(json_file) as f:
+                    data.extend(json.load(f))
+                    print(f"  Added {json_file.name} to training data.")
+ 
+    if count == 0:
+       print("No relevant data found within 50 miles.")
+       print(count)
+       return count
+        
+
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=2000, chunk_overlap=0)
+
+    docs = []
+    for entry in data:
+    	address = entry.get('address', '')
+    	if address is not None:
+    		print(f"Address to split: {address}")
+    		docs.extend(text_splitter.split_text(address))
+
+    embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
+    store = FAISS.from_texts(docs, embeddings)
+
+    faiss.write_index(store.index, "training.index")
+    store.index = None
+    print(count)
+    with open("faiss.pkl", "wb") as f:
+        pickle.dump(store, f)
+    
+    return count
+
+searched = 0
+# ...
+previous_response = ""
+# ...
 
 @app.route("/", methods=["GET"])
 def index():
   return "API Online"
 
-
-@app.route("/getopen", methods=["GET"])
-def opentry():
-  return openai_try
-
-def declare():
-  username = "aiassistantevvaadmin"
-  password = "EvvaAi10$"
-  hostname = "aiassistantdatabase.postgres.database.azure.com"
-  database_name = "aidatabasecombined"
-
-  # Construct the connection URL
-  db_connection_url = f"postgresql://{username}:{password}@{hostname}/{database_name}"
-
-
-last_api_call_time = time.time()
-
-
-def reset_history():
-  global history
-  history = []
-
+#last_api_call_time = time.time()
 
 @app.route("/", methods=["POST"])
 def ask():
-  global last_api_call_time  # Use the global last_api_call_time
+    global previous_response
+    global last_api_call_time
+    global llmChain
+    global searched
+    global count1
 
-  username = "aiassistantevvaadmin"
-  password = "EvvaAi10$"
-  hostname = "aiassistantdatabase.postgres.database.azure.com"
-  database_name = "aidatabasecombined"
+    username = "aiassistantevvaadmin"
+    password = "EvvaAi10$"
+    hostname = "aiassistantdatabase.postgres.database.azure.com"
+    database_name = "aidatabasecombined"
+    db_connection_url = f"postgresql://{username}:{password}@{hostname}/{database_name}"
 
-  # Construct the connection URL
-  db_connection_url = f"postgresql://{username}:{password}@{hostname}/{database_name}"
+    api_secret_from_frontend = request.headers.get('X-API-SECRET')
+    if api_secret_from_frontend != API_SECRET:
+        return jsonify({'error': 'Unauthorized access'}), 401
 
-  api_secret_from_frontend = request.headers.get('X-API-SECRET')
-  if api_secret_from_frontend != API_SECRET:
-    return jsonify({'error': 'Unauthorized access'}), 401
+    careteam_id = request.headers.get('careteam_id')
+    caregiver_id = request.headers.get('caregiver_id')
 
-  careteam_id = request.headers.get('careteam_id')
-  caregiver_id = request.headers.get('caregiver_id')
+    if careteam_id == "not implied" or caregiver_id == "not implied":
+        return jsonify({'message': "Caregiver or careteam id not implied"})
 
-  if careteam_id == "not implied" or caregiver_id == "not implied":
-    return jsonify({'message': "Caregiver or careteam id not implied"})
+    try:
+        reqData = request.get_json()
+        user_question = reqData['question']
+        user_address = request.headers.get('location')
+        print(f"All Headers: {request.headers}")
 
-  try:
-    reqData = request.get_json()
-    blanker = 1
-    if blanker == 1:
-      user_question = reqData['question']
+        current_time = time.time()
+        if current_time - last_api_call_time > 600:
+            
+            reset_history()
 
-      # Check if it's been more than 2 minutes since the last API call
-      current_time = time.time()
-      if current_time - last_api_call_time > 120:
-        reset_history()
-      last_api_call_time = current_time  # Update the last API call time
+            # Only confirm address if the question is related to a search
+            user_location = get_coordinates(user_address)
+            count1 = train(user_location)  # Train based on user location for the first call of a session
+            print(count1)
+            last_api_call_time = current_time
 
-      # Process user location only if needed
-      if "mapbox" in user_question.lower(
-      ) or "mapboxapi" in user_question.lower():
-        location = user_question
-        latitude, longitude = geocode(location, map_key)
-        answer = "Please provide your complete location so that we can find the nearest required professional for you: "
-      else:
-        docs = store.similarity_search(user_question)
-        contexts = [
-            f"Context {i}:\n{doc.page_content}" for i, doc in enumerate(docs)
-        ]
-        answer = llmChain.predict(question=user_question,context="\n\n".join(contexts),history=history)
+        if not llmChain:
+            # Initialize llmChain if it's not initialized yet
+            with open("training/master.txt", "r") as f:
+                promptTemplate = f.read()
 
+            prompt = Prompt(template=promptTemplate, input_variables=["history", "context", "question"])
+            llmChain = LLMChain(prompt=prompt, llm=OpenAIChat(temperature=0.5,
+                                                             model_name="gpt-4-1106-preview",
+                                                             openai_api_key=openai_api_key))
+        # Only confirm the user's address for search-related questions
+        search_keywords = ["need", "looking for", "search for", "find", "locate", "where is","want information about", "details about", "data on", "facts on", "tell me about","need assistance with", "help with", "support for", "information on","seeking", "inquiring about", "inquiring on", "searching for", "looking up"]
+        
+        if any(keyword in user_question.lower() for keyword in search_keywords):
+                if searched == 0:
+                     searched = searched + 1
+                     print(searched)
+                     confirm_message = f"Do you want me to search near\n{user_address}\n\nReply with 'yes' or 'no'."
+                     previous_response = confirm_message
+                     response = confirm_message
+                     searched = searched + 1
+                     print(searched)
+                else:
+                     response = llmChain.predict(question=user_question, context="\n\n".join(history), history=history)
+        elif previous_response.startswith("Do you want me to search near") and "yes" in user_question.lower():
+            # Continue with the user's provided address
+            if count1 < 1:
+                 response = "I am sorry! 🙁 I couldn’t find any suitable results within 100 miles. Evva is only available in limited geographies. Please contact Team Evva at info@evva360.com to learn more about when your region may be next. Would you like me to search near a different location?.. \n Please Reply with 'yes' or 'no'"
+                 previous_response = "I am sorry! 🙁 I couldn’t find any suitable results within 100 miles. Evva is only available in limited geographies. Please contact Team Evva at info@evva360.com to learn more about when your region may be next."
+            else:
+                 response = llmChain.predict(question=user_question, context="\n\n".join(history), history=history)
+        elif previous_response.startswith("Do you want me to search near") and "no" in user_question.lower():
+            # Ask for a new location
+            previous_response = "Please enter the new location where you want to search"
+            response = previous_response
+        elif previous_response.startswith("Do you want me to search near") and "yes" not in user_question.lower() and "no" not in user_question.lower():
+            response = "Please include yes or no in your answer"
 
-      history.append(f"Human: {user_question}")
-      history.append(f"Bot: {answer}")
+        elif previous_response.startswith("Please enter the new location where you want to search"):
+            user_address = user_question
+            user_location = get_coordinates(user_address)
+            count2 = train(user_location)  # Train based on the new user location
+            if count2 < 1:
+                 response = "I am sorry! 🙁 I couldn’t find any suitable results within 100 miles. Evva is only available in limited geographies. Please contact Team Evva at info@evva360.com to learn more about when your region may be next. Would you like me to search near a different location?.. \n Please Reply with 'yes' or 'no'"
+                 previous_response = "I am sorry! 🙁 I couldn’t find any suitable results within 100 miles. Evva is only available in limited geographies. Please contact Team Evva at info@evva360.com to learn more about when your region may be next."
+            else:
+                 previous_response = ""
+                 response = llmChain.predict(question=user_question, context="\n\n".join(history), history=history)
+        elif previous_response.startswith("I am sorry! 🙁 I couldn’t find ") and "no" in user_question.lower():
+            response = llmChain.predict(question=user_question, context="\n\n".join(history), history=history)
+            previous_response = ""
+        elif previous_response.startswith("I am sorry! 🙁 I couldn’t find ") and "yes" in user_question.lower():
+            previous_response = "Please enter the new location where you want to search"
+            response = previous_response
+        elif previous_response.startswith("I am sorry! 🙁 I couldn’t find ") and "yes" not in user_question.lower() and "no" not in user_question.lower():
+            response = "Please include yes or no in your answer"
+        else:
+            # Continue with the user's question for non-search queries
+            response = llmChain.predict(question=user_question, context="\n\n".join(history), history=history)
 
-      insert_conversation(user_question, answer, careteam_id, caregiver_id)
+        history.append(f"Bot: {response}")
+        history.append(f"Human: {user_question}")
+        insert_conversation(user_question, response, careteam_id, caregiver_id)
 
-      return jsonify({"answer": answer, "success": True})
-    else:
-      return jsonify({
-          "answer": None,
-          "success": False,
-          "message": "Unauthorised"
-      })
-  except Exception as e:
-    return jsonify({"answer": None, "success": False, "message": str(e)}), 400
-
+        return jsonify({"answer": response, "success": True})
+    except Exception as e:
+        return jsonify({"answer": None, "success": False, "message": str(e)}), 400
 
 @app.route('/get_first_question', methods=['GET'])
 def get_question():
@@ -876,10 +768,12 @@ def get_question():
     return jsonify({'error': 'Unauthorized access'}), 401
 
   # Getting the user id from the frontend
-  careteam_id = request.headers.get('careteam_id')
-  caregiver_id = request.headers.get('caregiver_id')
+  careteam_id = request.headers.get('careteam')
+  caregiver_id = request.headers.get('caregiver')
+  patient_name = request.headers.get('patient')
 
   print(f"All Headers: {request.headers}")
+  print(patient_name)
 
 
   if careteam_id == "not implied" or caregiver_id == "not implied":
@@ -909,23 +803,33 @@ def get_question():
     if isinstance(current_question, dict) and 'options' in current_question:
       options = current_question['options']
       formatted_options = [f"{option}" for i, option in enumerate(options)]
+      if "the patient" in current_question['question']:
+      	modified_question = current_question['question'].replace("the patient", patient_name)
+      else:
+      	modified_question = current_question['question']
       question_text = {
-          'question': current_question['question'],
+          'question': modified_question ,
           'options': formatted_options
       }
 
       return jsonify({
           'message': "First Question",
-          'question': current_question['question'],
+          'question': modified_question,
           'options': formatted_options
       })
     else:
+      if "the patient" in question['question']:
+      	modified_question = current_question['question'].replace("the patient", patient_name)
+      else:
+      	modified_question = current_question['question']
       question_text = {'question': current_question}
 
       return jsonify({
           'message': "First Question",
-          'question': current_question['question']
+          'question': modified_question
       })
+
+
 
 def end_checkin(careteam_id):
     # Logic to handle the end of check-in for the given careteam_id
@@ -947,8 +851,9 @@ def submit_answer():
     return jsonify({'error': 'Unauthorized access'}), 401
 
   # Getting the user id from the frontend
-  careteam_id = request.headers.get('careteam_id')
-  caregiver_id = request.headers.get('caregiver_id')
+  careteam_id = request.headers.get('careteam')
+  caregiver_id = request.headers.get('caregiver')
+  patient_name = request.headers.get('patient')
 
   if careteam_id == "not implied" or caregiver_id == "not implied":
     return jsonify({'message': "Caregiver or careteam id not implied"})
@@ -988,11 +893,12 @@ def submit_answer():
     # Check if the user responded "no" to question 4
     if current_question_key == 'Q4' and user_response.lower() == 'no':
         end_checkin(careteam_id)
-        return jsonify({'message': 'All questions for this week have been answered!'})
+        return jsonify({'message': 'Response saved successfully! You have completed the check-in'})
 
     # Insert into the database (if needed)
     insert_checkin(str(current_question), user_response, caregiver_id,
                    careteam_id)
+    
 
     # Update the data with the user's response
     careteam_data[f"Q{current_question_index + 1}"] = {
@@ -1020,16 +926,25 @@ def submit_answer():
     else:
       next_question_key = question_keys[current_question_index + 1]
       next_question = questions[next_question_key]
+      if "the patient" in next_question['question']:
+      	modified_question = next_question['question'].replace("the patient", patient_name)
+      else:
+      	modified_question = next_question['question']
+
       if 'options' in next_question:
         return jsonify({
             'message': 'Response saved successfully!',
-            'question': next_question['question'],
+            'question': modified_question,
             'options': next_question['options']
         })
       else:
+        if "the patient" in next_question['question']:
+                modified_question = next_question['question'].replace("the patient", patient_name)
+        else:
+                modified_question = next_question['question']
         return jsonify({
             'message': 'Response saved successfully!',
-            'question': next_question['question']
+            'question': modified_question
         })
 
   except Exception as e:
@@ -1041,45 +956,6 @@ def submit_answer():
 
 
 
-# ... (previously defined code)
-
-
-@app.route('/perform_action', methods=['POST'])
-def perform_action():
-  # Perform the desired action here
-  #to add data
-  with open("user_responses.json", 'r') as json_file:
-    json_contents = json_file.read()
-
-  # Write the contents to the text file
-  with open("training/facts/user_responses.txt", 'w') as text_file:
-    text_file.write(json_contents)
-  #to train
-  trainingData = list(Path("training/facts/").glob("**/*.*"))
-  data = []
-  for training in trainingData:
-    with open(training) as f:
-      print(f"Add {f.name} to dataset")
-      data.append(f.read())
-
-  textSplitter = RecursiveCharacterTextSplitter(chunk_size=2000,
-                                                chunk_overlap=0)
-
-  docs = []
-  for sets in data:
-    docs.extend(textSplitter.split_text(sets))
-  embeddings = OpenAIEmbeddings(openai_api_key)
-  store = FAISS.from_texts(docs, embeddings)
-
-  faiss.write_index(store.index, "training.index")
-  store.index = None
-
-  with open("faiss.pkl", "wb") as f:
-    pickle.dump(store, f)
-
-  return jsonify({"message": "Action performed successfully!"})
-
-
 @app.route('/get_questionnaire_question', methods=['GET'])
 def get_questionnaire_question():
   # Check if the API_SECRET from the frontend matches the one stored in the environment
@@ -1088,8 +964,9 @@ def get_questionnaire_question():
     return jsonify({'error': 'Unauthorized access'}), 401
 
   # Getting the user id from the frontend
-  careteam_id = request.headers.get('careteam_id')
-  caregiver_id = request.headers.get('caregiver_id')
+  careteam_id = request.headers.get('careteam')
+  caregiver_id = request.headers.get('caregiver')
+  patient_name = request.headers.get('patient')
 
   if careteam_id == "not implied" or caregiver_id == "not implied":
     return jsonify({'message': "Caregiver or careteam id not implied"})
@@ -1118,18 +995,27 @@ def get_questionnaire_question():
 
     if isinstance(qcurrent_question, dict) and 'options' in qcurrent_question:
       options = [option["option"] for option in qcurrent_question["options"]]
+      if "the patient" in qcurrent_question['question']:
+                modified_question = qcurrent_question['question'].replace("the patient", patient_name)
+      else:
+                modified_question = qcurrent_question['question']
 
       return jsonify({
           'message': "First Question",
-          'question': qcurrent_question['question'],
+          'question': modified_question,
           'options': options
       })
     else:
+      if "the patient" in next_question['question']:
+                modified_question = qcurrent_question['question'].replace("the patient", patient_name)
+      else:
+                modified_question = qcurrent_question['question']
+
       question_text = {'question': qcurrent_question}
 
       return jsonify({
           'message': "First Question",
-          'question': qcurrent_question['question']
+          'question': modified_question
       })
 
 
@@ -1141,9 +1027,9 @@ def submit_questionnaire_answer():
     return jsonify({'error': 'Unauthorized access'}), 401
 
   # Getting the user id from the frontend
-  careteam_id = request.headers.get('careteam_id')
-  caregiver_id = request.headers.get('caregiver_id')
-
+  careteam_id = request.headers.get('careteam')
+  caregiver_id = request.headers.get('caregiver')
+  patient_name = request.headers.get('patient')
   if careteam_id == "not implied" or caregiver_id == "not implied":
     return jsonify({'message': "Caregiver or careteam id not implied"})
 
@@ -1223,18 +1109,22 @@ def submit_questionnaire_answer():
     else:
       next_question_key = question_keys[current_question_index + 1]
       next_question = questionaire_questions_new[next_question_key]
+      if "the patient" in next_question['question']:
+                modified_question = next_question['question'].replace("the patient", patient_name)
+      else:
+                modified_question = next_question['question']
 
       if 'options' in next_question:
         options = [option["option"] for option in next_question["options"]]
         return jsonify({
             'message': 'Response saved successfully!',
-            'question': next_question['question'],
+            'question': modified_question,
             'options': options
         })
       else:
         return jsonify({
             'message': 'Response saved successfully!',
-            'question': next_question['question']
+            'question': modified_question
         })
 
   except Exception as e:
@@ -1244,24 +1134,7 @@ def submit_questionnaire_answer():
     return jsonify({'error': 'Internal Server Error'}), 500
 
 
-@app.route('/calculate_questionnaire_results', methods=['GET'])
-def calculate_questionnaire_results():
-  results = {}
-  for patient, patient_data in stored_questionnaire_data.items():
-    results[patient] = {}
-    for title, title_data in patient_data.items():
-      results[patient][title] = title_data["total_score"]
-
-  # Convert the results to the desired format
-  converted_results = {}
-  for patient, title_scores in results.items():
-    for title, score in title_scores.items():
-      if patient not in converted_results:
-        converted_results[patient] = {}
-      converted_results[patient][title] = score
-
-  return jsonify(converted_results)
-
 
 if __name__ == '__main__':
-  app.run(host='0.0.0.0', port=8000)
+  app.run(host='0.0.0.0', port=3000)
+
