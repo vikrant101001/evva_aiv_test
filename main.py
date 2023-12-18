@@ -17,7 +17,7 @@ else:
   time.sleep(1)
   os.system('clear')
   print("BOT API SERVER RUNNING")
-  p = subprocess.Popen([sys.executable, 'newserver.py'],
+  p = subprocess.Popen([sys.executable, 'server.py'],
                        stdout=subprocess.PIPE,
                        stderr=subprocess.STDOUT,
                        text=True)
