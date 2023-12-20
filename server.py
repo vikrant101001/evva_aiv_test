@@ -33,6 +33,9 @@ from sqlalchemy.orm import sessionmaker
 from collections import defaultdict
 import threading
 
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 
@@ -47,7 +50,7 @@ match = pattern.search(text_content)
 desired_portion = match.group(0)
     
 
-os.environ["OPENAI_API_KEY"] = desired_portion
+# os.environ["OPENAI_API_KEY"] = desired_portion
 openai_api_key = os.environ["OPENAI_API_KEY"]
 mapbox_api_key = 'pk.eyJ1IjoiZXZ2YWhlYWx0aCIsImEiOiJjbGp5anJjY2IwNGlnM2RwYmtzNGR0aGduIn0.Nx4jv-saalq2sdw9qKuvbQ'
 geocoder = MapBox(api_key=mapbox_api_key)
