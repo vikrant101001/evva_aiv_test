@@ -768,9 +768,9 @@ def get_question():
     return jsonify({'error': 'Unauthorized access'}), 401
 
   # Getting the user id from the frontend
-  careteam_id = request.headers.get('careteam')
-  caregiver_id = request.headers.get('caregiver')
-  patient_name = request.headers.get('patient')
+  careteam_id = request.headers.get('careteamid')
+  caregiver_id = request.headers.get('userid')
+  patient_name = request.headers.get('patientfname')
 
   print(f"All Headers: {request.headers}")
   print(patient_name)
@@ -851,9 +851,9 @@ def submit_answer():
     return jsonify({'error': 'Unauthorized access'}), 401
 
   # Getting the user id from the frontend
-  careteam_id = request.headers.get('careteam')
-  caregiver_id = request.headers.get('caregiver')
-  patient_name = request.headers.get('patient')
+  careteam_id = request.headers.get('careteamid')
+  caregiver_id = request.headers.get('userid')
+  patient_name = request.headers.get('patientfname')
 
   if careteam_id == "not implied" or caregiver_id == "not implied":
     return jsonify({'message': "Caregiver or careteam id not implied"})
@@ -964,9 +964,9 @@ def get_questionnaire_question():
     return jsonify({'error': 'Unauthorized access'}), 401
 
   # Getting the user id from the frontend
-  careteam_id = request.headers.get('careteam')
-  caregiver_id = request.headers.get('caregiver')
-  patient_name = request.headers.get('patient')
+  careteam_id = request.headers.get('careteamid')
+  caregiver_id = request.headers.get('userid')
+  patient_name = request.headers.get('patientfname')
 
   if careteam_id == "not implied" or caregiver_id == "not implied":
     return jsonify({'message': "Caregiver or careteam id not implied"})
@@ -1027,9 +1027,9 @@ def submit_questionnaire_answer():
     return jsonify({'error': 'Unauthorized access'}), 401
 
   # Getting the user id from the frontend
-  careteam_id = request.headers.get('careteam')
-  caregiver_id = request.headers.get('caregiver')
-  patient_name = request.headers.get('patient')
+  careteam_id = request.headers.get('careteamid')
+  caregiver_id = request.headers.get('userid')
+  patient_name = request.headers.get('patientfname')
   if careteam_id == "not implied" or caregiver_id == "not implied":
     return jsonify({'message': "Caregiver or careteam id not implied"})
 
