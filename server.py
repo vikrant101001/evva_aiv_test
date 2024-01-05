@@ -33,9 +33,6 @@ from sqlalchemy.orm import sessionmaker
 from collections import defaultdict
 import threading
 
-from dotenv import load_dotenv
-
-load_dotenv()
 
 
 
@@ -50,7 +47,7 @@ match = pattern.search(text_content)
 desired_portion = match.group(0)
     
 
-# os.environ["OPENAI_API_KEY"] = desired_portion
+os.environ["OPENAI_API_KEY"] = desired_portion
 openai_api_key = os.environ["OPENAI_API_KEY"]
 mapbox_api_key = 'pk.eyJ1IjoiZXZ2YWhlYWx0aCIsImEiOiJjbGp5anJjY2IwNGlnM2RwYmtzNGR0aGduIn0.Nx4jv-saalq2sdw9qKuvbQ'
 geocoder = MapBox(api_key=mapbox_api_key)
@@ -671,8 +668,8 @@ def ask():
     if api_secret_from_frontend != API_SECRET:
         return jsonify({'error': 'Unauthorized access'}), 401
 
-    careteam_id = request.headers.get('careteam_id')
-    caregiver_id = request.headers.get('caregiver_id')
+    careteam_id = request.headers.get('careteamid')
+    caregiver_id = request.headers.get('userid')
 
     if careteam_id == "not implied" or caregiver_id == "not implied":
         return jsonify({'message': "Caregiver or careteam id not implied"})
@@ -680,14 +677,14 @@ def ask():
     try:
         reqData = request.get_json()
         user_question = reqData['question']
-        user_address = request.headers.get('location')
+        user_address = request.headers.get('userprimaddress')
         print(f"All Headers: {request.headers}")
 
         current_time = time.time()
-        if current_time - last_api_call_time > 300:
+        if current_time - last_api_call_time > 600:
             
             reset_history()
-            searched = 0
+
             # Only confirm address if the question is related to a search
             user_location = get_coordinates(user_address)
             count1 = train(user_location)  # Train based on user location for the first call of a session
