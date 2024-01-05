@@ -668,8 +668,8 @@ def ask():
     if api_secret_from_frontend != API_SECRET:
         return jsonify({'error': 'Unauthorized access'}), 401
 
-    careteam_id = request.headers.get('careteam_id')
-    caregiver_id = request.headers.get('caregiver_id')
+    careteam_id = request.headers.get('careteamid')
+    caregiver_id = request.headers.get('userid')
 
     if careteam_id == "not implied" or caregiver_id == "not implied":
         return jsonify({'message': "Caregiver or careteam id not implied"})
@@ -677,7 +677,7 @@ def ask():
     try:
         reqData = request.get_json()
         user_question = reqData['question']
-        user_address = request.headers.get('location')
+        user_address = request.headers.get('userprimaddress')
         print(f"All Headers: {request.headers}")
 
         current_time = time.time()
