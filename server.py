@@ -550,9 +550,8 @@ def insert_fa(fa_question, fa_answer, fa_title, fa_score, caregiver_id,
 
 
 
-def reset_history():
-    global history
-    history = []
+def reset_history(caregiver_id):
+    caregiver_histories[caregiver_id] = []
 
 
 def get_coordinates(address):
@@ -650,6 +649,9 @@ def index():
 
 #last_api_call_time = time.time()
 
+# Dictionary to store unique histories for each caregiver_id
+caregiver_histories = {}
+
 @app.route("/", methods=["POST"])
 def ask():
     global previous_response
@@ -682,8 +684,8 @@ def ask():
 
         current_time = time.time()
         if current_time - last_api_call_time > 600:
-            
-            reset_history()
+            reset_history(caregiver_id)
+
 
             # Only confirm address if the question is related to a search
             user_location = get_coordinates(user_address)
@@ -700,27 +702,30 @@ def ask():
             llmChain = LLMChain(prompt=prompt, llm=OpenAIChat(temperature=0.5,
                                                              model_name="gpt-4-1106-preview",
                                                              openai_api_key=openai_api_key))
+
         # Only confirm the user's address for search-related questions
-        search_keywords = ["need", "looking for", "search for", "find", "locate", "where is","want information about", "details about", "data on", "facts on", "tell me about","need assistance with", "help with", "support for", "information on","seeking", "inquiring about", "inquiring on", "searching for", "looking up"]
-        
+        search_keywords = ["need", "looking for", "search for", "find", "locate", "where is", "want information about", "details about", "data on", "facts on", "tell me about", "need assistance with", "help with", "support for", "information on", "seeking", "inquiring about", "inquiring on", "searching for", "looking up"]
+
+        caregiver_history = caregiver_histories.setdefault(caregiver_id, [])
+
         if any(keyword in user_question.lower() for keyword in search_keywords):
-                if searched == 0:
-                     searched = searched + 1
-                     print(searched)
-                     confirm_message = f"Do you want me to search near\n{user_address}\n\nReply with 'yes' or 'no'."
-                     previous_response = confirm_message
-                     response = confirm_message
-                     searched = searched + 1
-                     print(searched)
-                else:
-                     response = llmChain.predict(question=user_question, context="\n\n".join(history), history=history)
+            if searched == 0:
+                searched = searched + 1
+                print(searched)
+                confirm_message = f"Do you want me to search near\n{user_address}\n\nReply with 'yes' or 'no'."
+                previous_response = confirm_message
+                response = confirm_message
+                searched = searched + 1
+                print(searched)
+            else:
+                response = llmChain.predict(question=user_question, context="\n\n".join(caregiver_history), history=caregiver_history)
         elif previous_response.startswith("Do you want me to search near") and "yes" in user_question.lower():
             # Continue with the user's provided address
             if count1 < 1:
-                 response = "I am sorry! 🙁 I couldn’t find any suitable results within 100 miles. Evva is only available in limited geographies. Please contact Team Evva at info@evva360.com to learn more about when your region may be next. Would you like me to search near a different location?.. \n Please Reply with 'yes' or 'no'"
-                 previous_response = "I am sorry! 🙁 I couldn’t find any suitable results within 100 miles. Evva is only available in limited geographies. Please contact Team Evva at info@evva360.com to learn more about when your region may be next."
+                response = "I am sorry! 🙁 I couldn’t find any suitable results within 100 miles. Evva is only available in limited geographies. Please contact Team Evva at info@evva360.com to learn more about when your region may be next. Would you like me to search near a different location?.. \n Please Reply with 'yes' or 'no'"
+                previous_response = "I am sorry! 🙁 I couldn’t find any suitable results within 100 miles. Evva is only available in limited geographies. Please contact Team Evva at info@evva360.com to learn more about when your region may be next."
             else:
-                 response = llmChain.predict(question=user_question, context="\n\n".join(history), history=history)
+                response = llmChain.predict(question=user_question, context="\n\n".join(caregiver_history), history=caregiver_history)
         elif previous_response.startswith("Do you want me to search near") and "no" in user_question.lower():
             # Ask for a new location
             previous_response = "Please enter the new location where you want to search"
@@ -733,13 +738,13 @@ def ask():
             user_location = get_coordinates(user_address)
             count2 = train(user_location)  # Train based on the new user location
             if count2 < 1:
-                 response = "I am sorry! 🙁 I couldn’t find any suitable results within 100 miles. Evva is only available in limited geographies. Please contact Team Evva at info@evva360.com to learn more about when your region may be next. Would you like me to search near a different location?.. \n Please Reply with 'yes' or 'no'"
-                 previous_response = "I am sorry! 🙁 I couldn’t find any suitable results within 100 miles. Evva is only available in limited geographies. Please contact Team Evva at info@evva360.com to learn more about when your region may be next."
+                response = "I am sorry! 🙁 I couldn’t find any suitable results within 100 miles. Evva is only available in limited geographies. Please contact Team Evva at info@evva360.com to learn more about when your region may be next. Would you like me to search near a different location?.. \n Please Reply with 'yes' or 'no'"
+                previous_response = "I am sorry! 🙁 I couldn’t find any suitable results within 100 miles. Evva is only available in limited geographies. Please contact Team Evva at info@evva360.com to learn more about when your region may be next."
             else:
-                 previous_response = ""
-                 response = llmChain.predict(question=user_question, context="\n\n".join(history), history=history)
+                previous_response = ""
+                response = llmChain.predict(question=user_question, context="\n\n".join(caregiver_history), history=caregiver_history)
         elif previous_response.startswith("I am sorry! 🙁 I couldn’t find ") and "no" in user_question.lower():
-            response = llmChain.predict(question=user_question, context="\n\n".join(history), history=history)
+            response = llmChain.predict(question=user_question, context="\n\n".join(caregiver_history), history=caregiver_history)
             previous_response = ""
         elif previous_response.startswith("I am sorry! 🙁 I couldn’t find ") and "yes" in user_question.lower():
             previous_response = "Please enter the new location where you want to search"
@@ -748,10 +753,11 @@ def ask():
             response = "Please include yes or no in your answer"
         else:
             # Continue with the user's question for non-search queries
-            response = llmChain.predict(question=user_question, context="\n\n".join(history), history=history)
+            response = llmChain.predict(question=user_question, context="\n\n".join(caregiver_history), history=caregiver_history)
 
-        history.append(f"Bot: {response}")
-        history.append(f"Human: {user_question}")
+        caregiver_history.append(f"Bot: {response}")
+        caregiver_history.append(f"Human: {user_question}")
+        # Adjust insert_conversation to handle caregiver-specific history
         insert_conversation(user_question, response, careteam_id, caregiver_id)
 
         return jsonify({"answer": response, "success": True})
