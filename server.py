@@ -667,7 +667,7 @@ def ask():
                                                              openai_api_key=openai_api_key))
 
         # Only confirm the user's address for search-related questions
-        search_keywords = ["need", "looking for", "search for", "find", "locate", "where is", "want information about", "details about", "data on", "facts on", "tell me about", "need assistance with", "help with", "support for", "information on", "seeking", "inquiring about", "inquiring on", "searching for", "looking up"]
+        search_keywords = ["near my location"]
 
         caregiver_history = caregiver_histories.setdefault(caregiver_id, [])
 
@@ -997,7 +997,16 @@ def submit_questionnaire_answer():
             end_questionnaire(caregiver_id, careteam_id)
             return jsonify({'message': 'Response saved successfully! You have completed the questionnaire'})
 
-        title = get_title_based_on_index(current_question_index)
+        if current_question_index < 2:
+          title = "Daily Activities"
+        elif current_question_index < 4:
+          title = "Mobility"
+        elif current_question_index < 6:
+          title = "Cognition"
+        elif current_question_index < 8:
+          title = "Mind"
+        else:
+          title = "Independence (IADL)"
 
         careteam_data[f"Q{current_question_index + 1}"] = {
             'question': current_question['question'],
