@@ -63,25 +63,7 @@ llmChain = None
 # Load existing data from the JSON file, if any
 
 
-json_file_path2 = 'questionnaire_data.json'
-try:
-  with open(json_file_path2, 'r') as json_file:
-    qdata = json.load(json_file)
-except FileNotFoundError:
-  qdata = {
-      "assessments": {
-          "careteam_id1": {
-              "Week 1": {
-                  "current_question_index": 0
-              }
-          },
-          "careteam_id2": {
-              "Week 1": {
-                  "current_question_index": 0
-              }
-          }
-      }
-  }
+
 
 # Define the questions and gather user information
 questions = {
@@ -746,7 +728,9 @@ def ask():
         return jsonify({"answer": None, "success": False, "message": str(e)}), 400
 
 
+
 json_file_path = 'user_responses.json'
+json_file_path2 = 'questionnaire_data.json'
 
 
 try:
@@ -755,15 +739,31 @@ try:
 except FileNotFoundError:
     data = {}
 
-# Helper function to end the check-in for a given caregiver_id
-def end_checkin(caregiver_id):
+try:
+    with open(json_file_path2, 'r') as json_file:
+        qdata = json.load(json_file)
+except FileNotFoundError:
+    qdata = {}
+
+# Helper function to end the check-in for a given caregiver_id and careteam_id
+def end_checkin(caregiver_id, careteam_id):
     current_week = len(data['check_ins'])
     week = f"Week {current_week}"
-    data['check_ins'][caregiver_id][week] = {'current_question_index': 0}
+    data['check_ins'][caregiver_id][careteam_id][week] = {'current_question_index': 0}
     
     # Save the data in the JSON file
     with open(json_file_path, 'w') as json_file:
         json.dump(data, json_file, indent=4)
+
+# Helper function to end the questionnaire for a given caregiver_id and careteam_id
+def end_questionnaire(caregiver_id, careteam_id):
+    current_week = len(qdata['assessments'])
+    week = f"Week {current_week}"
+    qdata['assessments'][caregiver_id][careteam_id][week] = {'current_question_index': 0}
+    
+    # Save the data in the JSON file
+    with open(json_file_path2, 'w') as json_file:
+        json.dump(qdata, json_file, indent=4)
 
 # /get_first_question route
 @app.route('/get_first_question', methods=['GET'])
@@ -773,15 +773,16 @@ def get_question():
         return jsonify({'error': 'Unauthorized access'}), 401
 
     caregiver_id = request.headers.get('userid')
+    careteam_id = request.headers.get('careteamid')
     patient_name = request.headers.get('patientfname')
 
-    if caregiver_id == "not implied":
-        return jsonify({'message': "Caregiver id not implied"})
+    if caregiver_id == "not implied" or careteam_id == "not implied":
+        return jsonify({'message': "Caregiver or careteam id not implied"})
 
     current_week = len(data['check_ins'])
     week = "Week " + str(current_week)
 
-    caregiver_data = data['check_ins'].setdefault(caregiver_id, {}).setdefault(week, {})
+    caregiver_data = data['check_ins'].setdefault(caregiver_id, {}).setdefault(careteam_id, {}).setdefault(week, {})
     current_question_index = caregiver_data.get('current_question_index', 0)
 
     if current_question_index <= len(questions):
@@ -831,10 +832,11 @@ def submit_answer():
         return jsonify({'error': 'Unauthorized access'}), 401
 
     caregiver_id = request.headers.get('userid')
+    careteam_id = request.headers.get('careteamid')
     patient_name = request.headers.get('patientfname')
 
-    if caregiver_id == "not implied":
-        return jsonify({'message': "Caregiver id not implied"})
+    if caregiver_id == "not implied" or careteam_id == "not implied":
+        return jsonify({'message': "Caregiver or careteam id not implied"})
 
     try:
         user_response = request.json.get('answer')
@@ -843,7 +845,7 @@ def submit_answer():
 
         current_week = len(data['check_ins'])
         week = f"Week {current_week}"
-        caregiver_data = data['check_ins'].setdefault(caregiver_id, {}).setdefault(week, {})
+        caregiver_data = data['check_ins'].setdefault(caregiver_id, {}).setdefault(careteam_id, {}).setdefault(week, {})
         current_question_index = caregiver_data.get('current_question_index', 0)
 
         question_keys = list(questions.keys())
@@ -856,7 +858,7 @@ def submit_answer():
         current_question = questions[current_question_key]
 
         if current_question_key == 'Q4' and user_response.lower() == 'no':
-            end_checkin(caregiver_id)
+            end_checkin(caregiver_id, careteam_id)
             return jsonify({'message': 'Response saved successfully! You have completed the check-in'})
 
         caregiver_data[f"Q{current_question_index + 1}"] = {
@@ -882,16 +884,13 @@ def submit_answer():
                 modified_question = next_question['question']
 
             if 'options' in next_question:
+                options = [f"{option}" for i, option in enumerate(next_question['options'])]
                 return jsonify({
                     'message': 'Response saved successfully!',
                     'question': modified_question,
-                    'options': next_question['options']
+                    'options': options
                 })
             else:
-                if "the patient" in next_question['question']:
-                    modified_question = next_question['question'].replace("the patient", patient_name)
-                else:
-                    modified_question = next_question['question']
                 return jsonify({
                     'message': 'Response saved successfully!',
                     'question': modified_question
@@ -901,185 +900,145 @@ def submit_answer():
         traceback.print_exc()
         return jsonify({'error': 'Internal Server Error'}), 500
 
-
-
+# /get_questionnaire_question route
 @app.route('/get_questionnaire_question', methods=['GET'])
 def get_questionnaire_question():
-  # Check if the API_SECRET from the frontend matches the one stored in the environment
-  api_secret_from_frontend = request.headers.get('X-API-SECRET')
-  if api_secret_from_frontend != API_SECRET:
-    return jsonify({'error': 'Unauthorized access'}), 401
+    api_secret_from_frontend = request.headers.get('X-API-SECRET')
+    if api_secret_from_frontend != API_SECRET:
+        return jsonify({'error': 'Unauthorized access'}), 401
 
-  # Getting the user id from the frontend
-  careteam_id = request.headers.get('careteamid')
-  caregiver_id = request.headers.get('userid')
-  patient_name = request.headers.get('patientfname')
+    caregiver_id = request.headers.get('userid')
+    careteam_id = request.headers.get('careteamid')
+    patient_name = request.headers.get('patientfname')
 
-  if careteam_id == "not implied" or caregiver_id == "not implied":
-    return jsonify({'message': "Caregiver or careteam id not implied"})
-
-  qcurrent_week = len(qdata['assessments'])
-
-  week = "Week " + str(qcurrent_week)
-  qcurrent_question_index = qdata['assessments'].get(careteam_id, {}).get(
-      f"Week {qcurrent_week}", {}).get('current_question_index', 0)
-
-  if qcurrent_question_index <= len(questionaire_questions_new):
-    # Update the data structure for the specific careteam_id
-    week_data = qdata['assessments'].setdefault(careteam_id,
-                                                {}).setdefault(week, {})
-    week_data.clear()
-    week_data["current_question_index"] = 0
-
-    # Save the updated data in 'questionnaire_data.json' file
-    with open('questionnaire_data.json', 'w') as file:
-      json.dump(qdata, file, indent=4)
-
-    qcurrent_question_index = 0
-    qcurrent_question_key = list(
-        questionaire_questions_new.keys())[qcurrent_question_index]
-    qcurrent_question = questionaire_questions_new[qcurrent_question_key]
-
-    if isinstance(qcurrent_question, dict) and 'options' in qcurrent_question:
-      options = [option["option"] for option in qcurrent_question["options"]]
-      if "the patient" in qcurrent_question['question']:
-                modified_question = qcurrent_question['question'].replace("the patient", patient_name)
-      else:
-                modified_question = qcurrent_question['question']
-
-      return jsonify({
-          'message': "First Question",
-          'question': modified_question,
-          'options': options
-      })
-    else:
-      if "the patient" in next_question['question']:
-                modified_question = qcurrent_question['question'].replace("the patient", patient_name)
-      else:
-                modified_question = qcurrent_question['question']
-
-      question_text = {'question': qcurrent_question}
-
-      return jsonify({
-          'message': "First Question",
-          'question': modified_question
-      })
-
-
-@app.route('/submit_questionnaire_answer', methods=['POST'])
-def submit_questionnaire_answer():
-  # Check if the API_SECRET from the frontend matches the one stored in the environment
-  api_secret_from_frontend = request.headers.get('X-API-SECRET')
-  if api_secret_from_frontend != API_SECRET:
-    return jsonify({'error': 'Unauthorized access'}), 401
-
-  # Getting the user id from the frontend
-  careteam_id = request.headers.get('careteamid')
-  caregiver_id = request.headers.get('userid')
-  patient_name = request.headers.get('patientfname')
-  if careteam_id == "not implied" or caregiver_id == "not implied":
-    return jsonify({'message': "Caregiver or careteam id not implied"})
-
-  try:
-    user_response = request.json.get('answer')
-    if not user_response:
-      return jsonify({'error': 'Invalid request'}), 400
-
-    score = scoring_dict.get(user_response, None)
-
-    if score is None:
-      return jsonify({'error': 'Invalid answer'}), 400
+    if caregiver_id == "not implied" or careteam_id == "not implied":
+        return jsonify({'message': "Caregiver or careteam id not implied"})
 
     qcurrent_week = len(qdata['assessments'])
+    week = "Week " + str(qcurrent_week)
+    qcurrent_question_index = qdata['assessments'].get(caregiver_id, {}).get(careteam_id, {}).get(week, {}).get('current_question_index', 0)
 
-    # Check if this week's entry exists for the specific careteam_id, if not, create a new entry
-    week = f"Week {qcurrent_week}"
-    careteam_data = qdata['assessments'].setdefault(careteam_id,
-                                                    {}).setdefault(week, {})
-    current_question_index = careteam_data.get('current_question_index', 0)
+    if qcurrent_question_index <= len(questionaire_questions_new):
+        week_data = qdata['assessments'].setdefault(caregiver_id, {}).setdefault(careteam_id, {}).setdefault(week, {})
+        week_data.clear()
+        week_data["current_question_index"] = 0
 
-    if current_question_index < 2:
-      title = "Daily Activities"
-    elif current_question_index < 4:
-      title = "Mobility"
-    elif current_question_index < 6:
-      title = "Cognition"
-    elif current_question_index < 8:
-      title = "Mind"
-    else:
-      title = "Independence (IADL)"
+        with open('questionnaire_data.json', 'w') as file:
+            json.dump(qdata, file, indent=4)
 
-    # Get the list of questions and their keys
-    question_keys = list(questionaire_questions_new.keys())
-    question_count = len(question_keys)
+        qcurrent_question_index = 0
+        qcurrent_question_key = list(questionaire_questions_new.keys())[qcurrent_question_index]
+        qcurrent_question = questionaire_questions_new[qcurrent_question_key]
 
-    # Check if all questions have been answered for this week
-    if current_question_index >= question_count:
-      return jsonify(
-          {'message': 'All questions for this week have been answered!'})
+        if isinstance(qcurrent_question, dict) and 'options' in qcurrent_question:
+            options = [option["option"] for option in qcurrent_question["options"]]
+            if "the patient" in qcurrent_question['question']:
+                modified_question = qcurrent_question['question'].replace("the patient", patient_name)
+            else:
+                modified_question = qcurrent_question['question']
 
-    # Get the current question and options (if applicable)
-    current_question_key = question_keys[current_question_index]
-    current_question = questionaire_questions_new[current_question_key]
+            return jsonify({
+                'message': "First Question",
+                'question': modified_question,
+                'options': options
+            })
+        else:
+            if "the patient" in next_question['question']:
+                modified_question = qcurrent_question['question'].replace("the patient", patient_name)
+            else:
+                modified_question = qcurrent_question['question']
 
-    # Insert into the database (if needed)
-    insert_fa(str(current_question), user_response, title, score, caregiver_id,
-              careteam_id)
+            question_text = {'question': qcurrent_question}
 
-    # Update the data with the user's response
-    careteam_data[f"Q{current_question_index + 1}"] = {
-        'question': current_question['question'],
-        'response': user_response,
-        'title': title,
-        'score': score
-    }
+            return jsonify({
+                'message': "First Question",
+                'question': modified_question
+            })
 
-    # Increment the current question index for the next iteration
-    careteam_data['current_question_index'] = current_question_index + 1
+# /submit_questionnaire_answer route
+@app.route('/submit_questionnaire_answer', methods=['POST'])
+def submit_questionnaire_answer():
+    api_secret_from_frontend = request.headers.get('X-API-SECRET')
+    if api_secret_from_frontend != API_SECRET:
+        return jsonify({'error': 'Unauthorized access'}), 401
 
-    # If all questions are answered, move to the next week
-    if careteam_data['current_question_index'] >= question_count:
-      next_week = f"Week {qcurrent_week + 1}"
-      qdata['assessments'][careteam_id][next_week] = {
-          'current_question_index': 0
-      }
+    caregiver_id = request.headers.get('userid')
+    careteam_id = request.headers.get('careteamid')
+    patient_name = request.headers.get('patientfname')
 
-    # Save the data in the JSON file
-    with open(json_file_path2, 'w') as json_file:
-      json.dump(qdata, json_file, indent=4)
+    if caregiver_id == "not implied" or careteam_id == "not implied":
+        return jsonify({'message': "Caregiver or careteam id not implied"})
 
-    if (current_question_index + 1) >= question_count:
-      return jsonify({
-          'message':
-          'Response saved successfully! You have completed the check-in'
-      })
-    else:
-      next_question_key = question_keys[current_question_index + 1]
-      next_question = questionaire_questions_new[next_question_key]
-      if "the patient" in next_question['question']:
+    try:
+        user_response = request.json.get('answer')
+        if not user_response:
+            return jsonify({'error': 'Invalid request'}), 400
+
+        score = scoring_dict.get(user_response, None)
+
+        if score is None:
+            return jsonify({'error': 'Invalid answer'}), 400
+
+        qcurrent_week = len(qdata['assessments'])
+        week = f"Week {qcurrent_week}"
+        careteam_data = qdata['assessments'].setdefault(caregiver_id, {}).setdefault(careteam_id, {}).setdefault(week, {})
+        current_question_index = careteam_data.get('current_question_index', 0)
+
+        question_keys = list(questionaire_questions_new.keys())
+        question_count = len(question_keys)
+
+        if current_question_index >= question_count:
+            return jsonify({'message': 'All questions for this week have been answered!'})
+
+        current_question_key = question_keys[current_question_index]
+        current_question = questionaire_questions_new[current_question_key]
+
+        if current_question_key == 'Q4' and user_response.lower() == 'no':
+            end_questionnaire(caregiver_id, careteam_id)
+            return jsonify({'message': 'Response saved successfully! You have completed the questionnaire'})
+
+        title = get_title_based_on_index(current_question_index)
+
+        careteam_data[f"Q{current_question_index + 1}"] = {
+            'question': current_question['question'],
+            'response': user_response,
+            'title': title,
+            'score': score
+        }
+
+        careteam_data['current_question_index'] = current_question_index + 1
+
+        with open(json_file_path2, 'w') as json_file:
+            json.dump(qdata, json_file, indent=4)
+
+        if (current_question_index + 1) >= question_count:
+            return jsonify({
+                'message': 'Response saved successfully! You have completed the questionnaire'
+            })
+        else:
+            next_question_key = question_keys[current_question_index + 1]
+            next_question = questionaire_questions_new[next_question_key]
+            if "the patient" in next_question['question']:
                 modified_question = next_question['question'].replace("the patient", patient_name)
-      else:
+            else:
                 modified_question = next_question['question']
 
-      if 'options' in next_question:
-        options = [option["option"] for option in next_question["options"]]
-        return jsonify({
-            'message': 'Response saved successfully!',
-            'question': modified_question,
-            'options': options
-        })
-      else:
-        return jsonify({
-            'message': 'Response saved successfully!',
-            'question': modified_question
-        })
+            if 'options' in next_question:
+                options = [option["option"] for option in next_question["options"]]
+                return jsonify({
+                    'message': 'Response saved successfully!',
+                    'question': modified_question,
+                    'options': options
+                })
+            else:
+                return jsonify({
+                    'message': 'Response saved successfully!',
+                    'question': modified_question
+                })
 
-  except Exception as e:
-    # Manually print the traceback to the console
-    traceback.print_exc()
-
-    return jsonify({'error': 'Internal Server Error'}), 500
-
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': 'Internal Server Error'}), 500
 
 
 if __name__ == '__main__':
