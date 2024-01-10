@@ -114,6 +114,55 @@ questions = {
     }
 }
 
+questions_patient = {
+    'Q1': {
+        'question': "How is your mood today?",
+        'options':
+        ["Agitated", "Angry", "Frustrated", "Lost", "Neutral", "Happy"]
+    },
+    'Q2': {
+        'question':
+        "Have you experienced any of the following in the past week?",
+        'options': ["Increasing irritability", "Wandering", "Delusions"]
+    },
+    'Q3': {
+        'question':
+        "How was your sleep yesterday?",
+        'options': [
+            "Well rested", "Woke up once", "Woke up 2 or 3 times",
+            "Woke up 4 or more times", "Disrupted"
+        ]
+    },
+    'Q4': {
+        'question':
+        "Have you experienced any vomiting in the past week? (yes/no)",
+        'options': ["yes", "no"]
+    },
+    'Q5.1': {
+        'question':
+        "How many times in the past week?",
+        'options':
+        ["Once only", "2 to 3 times", "4 to 5 times", "More than 5 times"]
+    },
+    'Q5.2': {
+        'question':
+        "For how long did the episode last?",
+        'options': [
+            "Less than 30 minutes", "30 mins to an hour", "1 to 4 hours",
+            "Full day"
+        ]
+    },
+    'Q5.3': {
+        'question':
+        "How did it impact your daily activities?",
+        'options': [
+            "Difficulty eating and drinking", "Difficulty walking", "Fatigue",
+            "Severe dehydration"
+        ]
+    }
+}
+
+
 #questionairre = 'questionairre_questions.json'
 #with open(questionairre, 'r') as json_file:
 #  questionaire_questions_new = json.load(json_file)
@@ -332,6 +381,699 @@ questionaire_questions_new = {
         "Social",
         "question":
         "How frequently does the patient engage in social activities or maintain relationships?",
+        "options": [{
+            "option": "Regularly",
+            "score": 3
+        }, {
+            "option": "Occasionally",
+            "score": 2
+        }, {
+            "option": "Rarely",
+            "score": 1
+        }, {
+            "option": "Almost never or never",
+            "score": 0
+        }]
+    }
+}
+
+questionaire_questions_male = {
+    'Q1': {
+        "title":
+        "Daily Activities",
+        "question":
+        "Can the patient feed himself without assistance or does he need help during meal times?",
+        "options": [{
+            "option": "Manages independently",
+            "score": 3
+        }, {
+            "option": "Requires occasional assistance",
+            "score": 2
+        }, {
+            "option": "Needs frequent assistance",
+            "score": 1
+        }, {
+            "option": "Requires full assistance",
+            "score": 0
+        }]
+    },
+    'Q2': {
+        "title":
+        "Daily Activities",
+        "question":
+        "I see. Moving on, When it comes to dressing, can he put on his clothes without any assistance, or does he struggle with certain aspects like buttons, zippers, or shoe laces?",
+        "options": [{
+            "option": "Manages independently",
+            "score": 3
+        }, {
+            "option": "Requires occasional assistance",
+            "score": 2
+        }, {
+            "option": "Needs frequent assistance",
+            "score": 1
+        }, {
+            "option": "Requires full assistance",
+            "score": 0
+        }]
+    },
+    'Q3': {
+        "title":
+        "Mobility",
+        "question":
+        "Got it. How about transferring? Is the patient able to move in and out of his bed or chair on her own? Or does he need some help or an assistive device for that?",
+        "options": [{
+            "option": "Manages independently",
+            "score": 3
+        }, {
+            "option": "Requires occasional assistance",
+            "score": 2
+        }, {
+            "option": "Needs frequent assistance",
+            "score": 1
+        }, {
+            "option": "Requires full assistance",
+            "score": 0
+        }]
+    },
+    'Q4': {
+        "title":
+        "Mobility",
+        "question":
+        "How would you rate his ability to walk a block or climb a flight of stairs or more?",
+        "options": [{
+            "option": "Manages independently",
+            "score": 3
+        }, {
+            "option": "Requires occasional assistance",
+            "score": 2
+        }, {
+            "option": "Needs frequent assistance",
+            "score": 1
+        }, {
+            "option": "Requires full assistance",
+            "score": 0
+        }]
+    },
+    'Q5': {
+        "title":
+        "Cognition",
+        "question":
+        "Has the patient experienced any difficulties with memory, attention, or problem-solving that affected daily life?",
+        "options": [{
+            "option": "Rarely or never",
+            "score": 3
+        }, {
+            "option": "Occasionally",
+            "score": 2
+        }, {
+            "option": "Frequently",
+            "score": 1
+        }, {
+            "option": "Constantly",
+            "score": 0
+        }]
+    },
+    'Q6': {
+        "title":
+        "Cognition",
+        "question":
+        "Thank you. Has he exhibited difficulties in recognizing his environment or wandered away from home lately?",
+        "options": [{
+            "option": "Rarely or never",
+            "score": 3
+        }, {
+            "option": "Occasionally",
+            "score": 2
+        }, {
+            "option": "Frequently",
+            "score": 1
+        }, {
+            "option": "Constantly",
+            "score": 0
+        }]
+    },
+    'Q7': {
+        "title":
+        "Mind",
+        "question":
+        "Has the patient felt agitated, anxious, irritable, or depressed?",
+        "options": [{
+            "option": "Rarely or never",
+            "score": 3
+        }, {
+            "option": "Occasionally",
+            "score": 2
+        }, {
+            "option": "Frequently",
+            "score": 1
+        }, {
+            "option": "Constantly",
+            "score": 0
+        }]
+    },
+    'Q8': {
+        "title":
+        "Mind",
+        "question":
+        "Thank you for answering. From late afternoon till night, has the patient shown increased confusion, disorientation, restlessness, or difficulty sleeping?",
+        "options": [{
+            "option": "Rarely or never",
+            "score": 3
+        }, {
+            "option": "Occasionally",
+            "score": 2
+        }, {
+            "option": "Frequently",
+            "score": 1
+        }, {
+            "option": "Constantly",
+            "score": 0
+        }]
+    },
+    'Q9': {
+        "title":
+        "Independence (IADL)",
+        "question":
+        "Thanks for that. Now, let's move on to some instrumental activities. Can the patient prepare and cook meals by himself?Or does he require help with certain dishes or prefer pre-prepared meals?",
+        "options": [{
+            "option": "Manages independently",
+            "score": 3
+        }, {
+            "option": "Requires occasional assistance",
+            "score": 2
+        }, {
+            "option": "Needs frequent assistance",
+            "score": 1
+        }, {
+            "option": "Requires full assistance",
+            "score": 0
+        }]
+    },
+    'Q10': {
+        "title":
+        "Independence (IADL)",
+        "question":
+        "Understood. When it comes to his medications, can the patient manage and take them correctly without supervision? Or does he sometimes forget and need reminders?",
+        "options": [{
+            "option": "Manages independently",
+            "score": 3
+        }, {
+            "option": "Requires occasional assistance",
+            "score": 2
+        }, {
+            "option": "Needs frequent assistance",
+            "score": 1
+        }, {
+            "option": "Requires full assistance",
+            "score": 0
+        }]
+    },
+    'Q11': {
+        "title":
+        "Social",
+        "question":
+        "Now, thinking about the patient’s social activity. Has the patient had any difficulty interacting with relatives or friends or participating in community or social activities?",
+        "options": [{
+            "option": "No difficulty, socializes independently",
+            "score": 3
+        }, {
+            "option": "Some difficulty",
+            "score": 2
+        }, {
+            "option": "Much difficulty",
+            "score": 1
+        }, {
+            "option": "Cannot socialize without assistance",
+            "score": 0
+        }]
+    },
+    'Q12': {
+        "title":
+        "Social",
+        "question":
+        "How frequently does the patient engage in social activities or maintain relationships?",
+        "options": [{
+            "option": "Regularly",
+            "score": 3
+        }, {
+            "option": "Occasionally",
+            "score": 2
+        }, {
+            "option": "Rarely",
+            "score": 1
+        }, {
+            "option": "Almost never or never",
+            "score": 0
+        }]
+    }
+}
+
+questionaire_questions_female = {
+    'Q1': {
+        "title":
+        "Daily Activities",
+        "question":
+        "Can the patient feed herself without assistance or does she need help during meal times?",
+        "options": [{
+            "option": "Manages independently",
+            "score": 3
+        }, {
+            "option": "Requires occasional assistance",
+            "score": 2
+        }, {
+            "option": "Needs frequent assistance",
+            "score": 1
+        }, {
+            "option": "Requires full assistance",
+            "score": 0
+        }]
+    },
+    'Q2': {
+        "title":
+        "Daily Activities",
+        "question":
+        "I see. Moving on, When it comes to dressing, can she put on her clothes without any assistance, or does she struggle with certain aspects like buttons, zippers, or shoe laces?",
+        "options": [{
+            "option": "Manages independently",
+            "score": 3
+        }, {
+            "option": "Requires occasional assistance",
+            "score": 2
+        }, {
+            "option": "Needs frequent assistance",
+            "score": 1
+        }, {
+            "option": "Requires full assistance",
+            "score": 0
+        }]
+    },
+    'Q3': {
+        "title":
+        "Mobility",
+        "question":
+        "Got it. How about transferring? Is the patient able to move in and out of her bed or chair on her own? Or does she need some help or an assistive device for that?",
+        "options": [{
+            "option": "Manages independently",
+            "score": 3
+        }, {
+            "option": "Requires occasional assistance",
+            "score": 2
+        }, {
+            "option": "Needs frequent assistance",
+            "score": 1
+        }, {
+            "option": "Requires full assistance",
+            "score": 0
+        }]
+    },
+    'Q4': {
+        "title":
+        "Mobility",
+        "question":
+        "How would you rate her ability to walk a block or climb a flight of stairs or more?",
+        "options": [{
+            "option": "Manages independently",
+            "score": 3
+        }, {
+            "option": "Requires occasional assistance",
+            "score": 2
+        }, {
+            "option": "Needs frequent assistance",
+            "score": 1
+        }, {
+            "option": "Requires full assistance",
+            "score": 0
+        }]
+    },
+    'Q5': {
+        "title":
+        "Cognition",
+        "question":
+        "Has the patient experienced any difficulties with memory, attention, or problem-solving that affected daily life?",
+        "options": [{
+            "option": "Rarely or never",
+            "score": 3
+        }, {
+            "option": "Occasionally",
+            "score": 2
+        }, {
+            "option": "Frequently",
+            "score": 1
+        }, {
+            "option": "Constantly",
+            "score": 0
+        }]
+    },
+    'Q6': {
+        "title":
+        "Cognition",
+        "question":
+        "Thank you. Has she exhibited difficulties in recognizing her environment or wandered away from home lately?",
+        "options": [{
+            "option": "Rarely or never",
+            "score": 3
+        }, {
+            "option": "Occasionally",
+            "score": 2
+        }, {
+            "option": "Frequently",
+            "score": 1
+        }, {
+            "option": "Constantly",
+            "score": 0
+        }]
+    },
+    'Q7': {
+        "title":
+        "Mind",
+        "question":
+        "Has the patient felt agitated, anxious, irritable, or depressed?",
+        "options": [{
+            "option": "Rarely or never",
+            "score": 3
+        }, {
+            "option": "Occasionally",
+            "score": 2
+        }, {
+            "option": "Frequently",
+            "score": 1
+        }, {
+            "option": "Constantly",
+            "score": 0
+        }]
+    },
+    'Q8': {
+        "title":
+        "Mind",
+        "question":
+        "Thank you for answering. From late afternoon till night, has the patient shown increased confusion, disorientation, restlessness, or difficulty sleeping?",
+        "options": [{
+            "option": "Rarely or never",
+            "score": 3
+        }, {
+            "option": "Occasionally",
+            "score": 2
+        }, {
+            "option": "Frequently",
+            "score": 1
+        }, {
+            "option": "Constantly",
+            "score": 0
+        }]
+    },
+    'Q9': {
+        "title":
+        "Independence (IADL)",
+        "question":
+        "Thanks for that. Now, let's move on to some instrumental activities. Can the patient prepare and cook meals by herself? Or does she require help with certain dishes or prefer pre-prepared meals?",
+        "options": [{
+            "option": "Manages independently",
+            "score": 3
+        }, {
+            "option": "Requires occasional assistance",
+            "score": 2
+        }, {
+            "option": "Needs frequent assistance",
+            "score": 1
+        }, {
+            "option": "Requires full assistance",
+            "score": 0
+        }]
+    },
+    'Q10': {
+        "title":
+        "Independence (IADL)",
+        "question":
+        "Understood. When it comes to her medications, can the patient manage and take them correctly without supervision? Or does she sometimes forget and need reminders?",
+        "options": [{
+            "option": "Manages independently",
+            "score": 3
+        }, {
+            "option": "Requires occasional assistance",
+            "score": 2
+        }, {
+            "option": "Needs frequent assistance",
+            "score": 1
+        }, {
+            "option": "Requires full assistance",
+            "score": 0
+        }]
+    },
+    'Q11': {
+        "title":
+        "Social",
+        "question":
+        "Now, thinking about the patient’s social activity. Has the patient had any difficulty interacting with relatives or friends or participating in community or social activities?",
+        "options": [{
+            "option": "No difficulty, socializes independently",
+            "score": 3
+        }, {
+            "option": "Some difficulty",
+            "score": 2
+        }, {
+            "option": "Much difficulty",
+            "score": 1
+        }, {
+            "option": "Cannot socialize without assistance",
+            "score": 0
+        }]
+    },
+    'Q12': {
+        "title":
+        "Social",
+        "question":
+        "How frequently does the patient engage in social activities or maintain relationships?",
+        "options": [{
+            "option": "Regularly",
+            "score": 3
+        }, {
+            "option": "Occasionally",
+            "score": 2
+        }, {
+            "option": "Rarely",
+            "score": 1
+        }, {
+            "option": "Almost never or never",
+            "score": 0
+        }]
+    }
+}
+
+questionaire_questions_patient = {
+    'Q1': {
+        "title":
+        "Daily Activities",
+        "question":
+        " Can you feed yourself without assistance or do you need help during meal times?",
+        "options": [{
+            "option": "Manages independently",
+            "score": 3
+        }, {
+            "option": "Requires occasional assistance",
+            "score": 2
+        }, {
+            "option": "Needs frequent assistance",
+            "score": 1
+        }, {
+            "option": "Requires full assistance",
+            "score": 0
+        }]
+    },
+    'Q2': {
+        "title":
+        "Daily Activities",
+        "question":
+        "I see. Moving on, When it comes to dressing, can you put on your clothes without any assistance, or do you struggle with certain aspects like buttons, zippers, or shoe laces?",
+        "options": [{
+            "option": "Manages independently",
+            "score": 3
+        }, {
+            "option": "Requires occasional assistance",
+            "score": 2
+        }, {
+            "option": "Needs frequent assistance",
+            "score": 1
+        }, {
+            "option": "Requires full assistance",
+            "score": 0
+        }]
+    },
+    'Q3': {
+        "title":
+        "Mobility",
+        "question":
+        "Got it. How about transferring? Are you able to move in and out of your bed or chair on your own, or do you need some help or an assistive device for that?",
+        "options": [{
+            "option": "Manages independently",
+            "score": 3
+        }, {
+            "option": "Requires occasional assistance",
+            "score": 2
+        }, {
+            "option": "Needs frequent assistance",
+            "score": 1
+        }, {
+            "option": "Requires full assistance",
+            "score": 0
+        }]
+    },
+    'Q4': {
+        "title":
+        "Mobility",
+        "question":
+        " How would you rate your ability to walk a block or climb a flight of stairs or more?",
+        "options": [{
+            "option": "Manages independently",
+            "score": 3
+        }, {
+            "option": "Requires occasional assistance",
+            "score": 2
+        }, {
+            "option": "Needs frequent assistance",
+            "score": 1
+        }, {
+            "option": "Requires full assistance",
+            "score": 0
+        }]
+    },
+    'Q5': {
+        "title":
+        "Cognition",
+        "question":
+        " Have you experienced any difficulties with memory, attention, or problem-solving that affected daily life?",
+        "options": [{
+            "option": "Rarely or never",
+            "score": 3
+        }, {
+            "option": "Occasionally",
+            "score": 2
+        }, {
+            "option": "Frequently",
+            "score": 1
+        }, {
+            "option": "Constantly",
+            "score": 0
+        }]
+    },
+    'Q6': {
+        "title":
+        "Cognition",
+        "question":
+        "Have you exhibited difficulties in recognizing your environment or wandered away from home lately?",
+        "options": [{
+            "option": "Rarely or never",
+            "score": 3
+        }, {
+            "option": "Occasionally",
+            "score": 2
+        }, {
+            "option": "Frequently",
+            "score": 1
+        }, {
+            "option": "Constantly",
+            "score": 0
+        }]
+    },
+    'Q7': {
+        "title":
+        "Mind",
+        "question":
+        "Have you felt agitated, anxious, irritable, or depressed?",
+        "options": [{
+            "option": "Rarely or never",
+            "score": 3
+        }, {
+            "option": "Occasionally",
+            "score": 2
+        }, {
+            "option": "Frequently",
+            "score": 1
+        }, {
+            "option": "Constantly",
+            "score": 0
+        }]
+    },
+    'Q8': {
+        "title":
+        "Mind",
+        "question":
+        "Thank you for answering. From late afternoon till night, have you shown increased confusion, disorientation, restlessness, or difficulty sleeping?",
+        "options": [{
+            "option": "Rarely or never",
+            "score": 3
+        }, {
+            "option": "Occasionally",
+            "score": 2
+        }, {
+            "option": "Frequently",
+            "score": 1
+        }, {
+            "option": "Constantly",
+            "score": 0
+        }]
+    },
+    'Q9': {
+        "title":
+        "Independence (IADL)",
+        "question":
+        "Thanks for that. Now, let's move on to some instrumental activities. Can you prepare and cook meals by yourself, or do you require help with certain dishes or prefer pre-prepared meals?",
+        "options": [{
+            "option": "Manages independently",
+            "score": 3
+        }, {
+            "option": "Requires occasional assistance",
+            "score": 2
+        }, {
+            "option": "Needs frequent assistance",
+            "score": 1
+        }, {
+            "option": "Requires full assistance",
+            "score": 0
+        }]
+    },
+    'Q10': {
+        "title":
+        "Independence (IADL)",
+        "question":
+        "Understood. When it comes to your medications, can you manage and take them correctly without supervision, or do you sometimes forget and need reminders?",
+        "options": [{
+            "option": "Manages independently",
+            "score": 3
+        }, {
+            "option": "Requires occasional assistance",
+            "score": 2
+        }, {
+            "option": "Needs frequent assistance",
+            "score": 1
+        }, {
+            "option": "Requires full assistance",
+            "score": 0
+        }]
+    },
+    'Q11': {
+        "title":
+        "Social",
+        "question":
+        "Have you had any difficulty interacting with relatives or friends or participating in community or social activities?",
+        "options": [{
+            "option": "No difficulty, socializes independently",
+            "score": 3
+        }, {
+            "option": "Some difficulty",
+            "score": 2
+        }, {
+            "option": "Much difficulty",
+            "score": 1
+        }, {
+            "option": "Cannot socialize without assistance",
+            "score": 0
+        }]
+    },
+    'Q12': {
+        "title":
+        "Social",
+        "question":
+        "How frequently do you engage in social activities or maintain relationships?",
         "options": [{
             "option": "Regularly",
             "score": 3
@@ -784,6 +1526,12 @@ def get_question():
     careteam_id = request.headers.get('careteamid')
     patient_name = request.headers.get('patientfname')
 
+    # Getting the user id from the frontend
+    global questions
+    usertype = request.headers.get('userrole')
+    if usertype == "Care recipient":
+         questions = questions_patient
+
     if caregiver_id == "not implied" or careteam_id == "not implied":
         return jsonify({'message': "Caregiver or careteam id not implied"})
 
@@ -842,6 +1590,12 @@ def submit_answer():
     caregiver_id = request.headers.get('userid')
     careteam_id = request.headers.get('careteamid')
     patient_name = request.headers.get('patientfname')
+
+    # Getting the user id from the frontend
+    global questions
+    usertype = request.headers.get('userrole')
+    if usertype == "Care recipient":
+         questions = questions_patient
 
     if caregiver_id == "not implied" or careteam_id == "not implied":
         return jsonify({'message': "Caregiver or careteam id not implied"})
@@ -919,6 +1673,19 @@ def get_questionnaire_question():
     careteam_id = request.headers.get('careteamid')
     patient_name = request.headers.get('patientfname')
 
+
+    # Getting the user id from the frontend
+    global questionaire_questions_new
+    usertype = request.headers.get('userrole')
+    gender = request.headers.get('patientgender')
+    if usertype == "Care recipient":
+         questionaire_questions_new = questionaire_questions_patient
+    else:
+         if gender == "Male":
+               questionaire_questions_new = questionaire_questions_male
+         elif gender == "Female":
+               questionaire_questions_new = questionaire_questions_female
+             
     if caregiver_id == "not implied" or careteam_id == "not implied":
         return jsonify({'message': "Caregiver or careteam id not implied"})
 
@@ -973,6 +1740,18 @@ def submit_questionnaire_answer():
     caregiver_id = request.headers.get('userid')
     careteam_id = request.headers.get('careteamid')
     patient_name = request.headers.get('patientfname')
+
+    # Getting the user id from the frontend
+    global questionaire_questions_new
+    usertype = request.headers.get('userrole')
+    gender = request.headers.get('patientgender')
+    if usertype == "Care recipient":
+         questionaire_questions_new = questionaire_questions_patient
+    else:
+         if gender == "Male":
+               questionaire_questions_new = questionaire_questions_male
+         elif gender == "Female":
+               questionaire_questions_new = questionaire_questions_female
 
     if caregiver_id == "not implied" or careteam_id == "not implied":
         return jsonify({'message': "Caregiver or careteam id not implied"})
