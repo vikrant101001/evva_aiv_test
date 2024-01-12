@@ -1761,7 +1761,7 @@ def submit_questionnaire_answer():
         if not user_response:
             return jsonify({'error': 'Invalid request'}), 400
 
-        score = scoring_dict.get(user_response, None)
+        score = scoring_dict.get(user_response, 1)
 
         if score is None:
             return jsonify({'error': 'Invalid answer'}), 400
