@@ -1362,7 +1362,15 @@ previous_response = {}
 searched = {}
 last_api_call_times = {}
 
-
+def clean_response(response):
+    # Define a regex pattern to match valid characters
+    pattern = r'[^a-zA-Z0-9,. ]'
+    
+    # Use re.sub to replace invalid characters with an empty string
+    cleaned_response = re.sub(pattern, '', response)
+    
+    return cleaned_response
+    
 @app.route("/", methods=["POST"])
 def ask():
     global last_api_call_time
@@ -1473,9 +1481,11 @@ def ask():
         # Adjust insert_conversation to handle caregiver-specific history
         insert_conversation(user_question, response, careteam_id, caregiver_id)
 
-        return jsonify({"answer": response, "previous_response": previous_response.get(careteam_id, ""), "searched": searched.get(careteam_id, 0), "success": True})
+        baymax_response = clean_response(response)
+
+        return jsonify({"answer": response,"baymax_response" = baymax_response ,"previous_response": previous_response.get(careteam_id, ""), "searched": searched.get(careteam_id, 0), "success": True})
     except Exception as e:
-        return jsonify({"answer": None, "success": False, "message": str(e)}), 400
+        return jsonify({"answer": None, "baymax_response" = None, "success": False, "message": str(e)}), 400
 
 
 
