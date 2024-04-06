@@ -1483,9 +1483,9 @@ def ask():
 
         baymax_response = clean_response(response)
 
-        return jsonify({"answer": response,"baymax_response" = baymax_response ,"previous_response": previous_response.get(careteam_id, ""), "searched": searched.get(careteam_id, 0), "success": True})
+        return jsonify({"answer": response,"baymax_response" : baymax_response ,"previous_response": previous_response.get(careteam_id, ""), "searched": searched.get(careteam_id, 0), "success": True})
     except Exception as e:
-        return jsonify({"answer": None, "baymax_response" = None, "success": False, "message": str(e)}), 400
+        return jsonify({"answer": None, "baymax_response" : None, "success": False, "message": str(e)}), 400
 
 
 
