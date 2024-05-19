@@ -1421,60 +1421,12 @@ def ask():
 
             prompt = Prompt(template=promptTemplate, input_variables=["history", "context", "question"])
             llmChain = LLMChain(prompt=prompt, llm=OpenAIChat(temperature=0.5,
-                                                             model_name="gpt-4-1106-preview",
-                                                             openai_api_key=openai_api_key))
+                                                             model_name="gpt-4o",max_tokens = 150,
+                                                             openai_api_key=openai_api_key, ))
 
-        # Only confirm the user's address for search-related questions
-        search_keywords = ["near my location"]
-
-        careteam_history = careteam_histories.setdefault(careteam_id, [])
-
-        if any(keyword in user_question.lower() for keyword in search_keywords):
-            if searched.get(careteam_id, 0) == 0:
-                searched[careteam_id] = searched.get(careteam_id, 0) + 1
-                print(searched[careteam_id])
-                confirm_message = f"Do you want me to search near\n{user_address}\n\nReply with 'yes' or 'no'."
-                previous_response[careteam_id] = confirm_message
-                response = confirm_message
-                searched[careteam_id] = searched.get(careteam_id, 0) + 1
-                print(searched[careteam_id])
-            else:
-                response = llmChain.predict(question=user_question, context="\n\n".join(careteam_history), history=careteam_history)
-        elif previous_response.get(careteam_id, "").startswith("Do you want me to search near") and "yes" in user_question.lower():
-            # Continue with the user's provided address
-            if count1 < 1:
-                response = "I am sorry! 🙁 I couldn’t find any suitable results within 100 miles. Evva is only available in limited geographies. Please contact Team Evva at info@evva360.com to learn more about when your region may be next. Would you like me to search near a different location?.. \n Please Reply with 'yes' or 'no'"
-                previous_response[careteam_id] = "I am sorry! 🙁 I couldn’t find any suitable results within 100 miles. Evva is only available in limited geographies. Please contact Team Evva at info@evva360.com to learn more about when your region may be next."
-            else:
-                response = llmChain.predict(question=user_question, context="\n\n".join(careteam_history), history=careteam_history)
-        elif previous_response.get(careteam_id, "").startswith("Do you want me to search near") and "no" in user_question.lower():
-            # Ask for a new location
-            previous_response[careteam_id] = "Please enter the new location where you want to search"
-            response = previous_response[careteam_id]
-        elif previous_response.get(careteam_id, "").startswith("Do you want me to search near") and "yes" not in user_question.lower() and "no" not in user_question.lower():
-            response = "Please include yes or no in your answer"
-
-        elif previous_response.get(careteam_id, "").startswith("Please enter the new location where you want to search"):
-            user_address = user_question
-            user_location = get_coordinates(user_address)
-            count2 = train(user_location)  # Train based on the new user location
-            if count2 < 1:
-                response = "I am sorry! 🙁 I couldn’t find any suitable results within 100 miles. Evva is only available in limited geographies. Please contact Team Evva at info@evva360.com to learn more about when your region may be next. Would you like me to search near a different location?.. \n Please Reply with 'yes' or 'no'"
-                previous_response[careteam_id] = "I am sorry! 🙁 I couldn’t find any suitable results within 100 miles. Evva is only available in limited geographies. Please contact Team Evva at info@evva360.com to learn more about when your region may be next."
-            else:
-                previous_response[careteam_id] = ""
-                response = llmChain.predict(question=user_question, context="\n\n".join(careteam_history), history=careteam_history)
-        elif previous_response.get(careteam_id, "").startswith("I am sorry! 🙁 I couldn’t find ") and "no" in user_question.lower():
-            response = llmChain.predict(question=user_question, context="\n\n".join(careteam_history), history=careteam_history)
-            previous_response[careteam_id] = ""
-        elif previous_response.get(careteam_id, "").startswith("I am sorry! 🙁 I couldn’t find ") and "yes" in user_question.lower():
-            previous_response[careteam_id] = "Please enter the new location where you want to search"
-            response = previous_response[careteam_id]
-        elif previous_response.get(careteam_id, "").startswith("I am sorry! 🙁 I couldn’t find ") and "yes" not in user_question.lower() and "no" not in user_question.lower():
-            response = "Please include yes or no in your answer"
-        else:
-            # Continue with the user's question for non-search queries
-            response = llmChain.predict(question=user_question, context="\n\n".join(careteam_history), history=careteam_history)
+       
+        # Continue with the user's question for non-search queries
+        response = llmChain.predict(question=user_question, context="\n\n".join(careteam_history), history=careteam_history)
 
         careteam_history.append(f"Bot: {response}")
         careteam_history.append(f"Human: {user_question}")
