@@ -1424,18 +1424,22 @@ def ask():
                                                              model_name="gpt-4o",max_tokens = 150,
                                                              openai_api_key=openai_api_key, ))
 
-       
+        careteam_history = careteam_histories.setdefault(careteam_id, [])
         # Continue with the user's question for non-search queries
         response = llmChain.predict(question=user_question, context="\n\n".join(careteam_history), history=careteam_history)
 
         careteam_history.append(f"Bot: {response}")
         careteam_history.append(f"Human: {user_question}")
+        like = 'no'
+        if 'sreched' in response:
+            response = re.sub("sreched", '', response)
+            like = 'yes'
         # Adjust insert_conversation to handle caregiver-specific history
         insert_conversation(user_question, response, careteam_id, caregiver_id)
 
         baymax_response = clean_response(response)
 
-        return jsonify({"answer": response,"baymax_response" : baymax_response ,"previous_response": previous_response.get(careteam_id, ""), "searched": searched.get(careteam_id, 0), "success": True})
+        return jsonify({"answer": response,"baymax_response" : baymax_response ,"previous_response": previous_response.get(careteam_id, ""), "searched": searched.get(careteam_id, 0),"like":like "success": True})
     except Exception as e:
         return jsonify({"answer": None, "baymax_response" : None, "success": False, "message": str(e)}), 400
 
